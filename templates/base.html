@@ -1,0 +1,318 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>ML Everywhere - AI-Powered Solutions</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="/">
+          <i class="fas fa-brain me-2"></i>
+          <span class="text-gradient">ML</span> EVERYWHERE
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#home">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#features">Features</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#demos">Demos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#about">About</a>
+            </li>
+            <li class="nav-item">
+              <button class="btn btn-outline-light ms-2" data-bs-toggle="modal" data-bs-target="#loginModal">Log In</button>
+            </li>
+            <li class="nav-item">
+              <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#signupModal">Sign Up</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <section id="home" class="hero-section">
+      <div class="container">
+        <div class="row align-items-center min-vh-100">
+          <div class="col-lg-6">
+            <h1 class="display-3 fw-bold mb-4">
+              Machine Learning <span class="text-gradient">Everywhere</span>
+            </h1>
+            <p class="lead mb-4">
+              Discover how artificial intelligence transforms everyday experiences through predictive analytics,
+              intelligent decision-making, and cutting-edge technology.
+            </p>
+            <div class="hero-buttons">
+              <a href="#demos" class="btn btn-primary btn-lg me-3">
+                <i class="fas fa-play me-2"></i>Explore Demos
+              </a>
+              <a href="#features" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-info-circle me-2"></i>Learn More
+              </a>
+            </div>
+          </div>
+          <div class="col-lg-6 text-center">
+            <div class="hero-visual">
+              <div class="hero-visual">
+                <div class="ai-brain">
+                  <i class="fas fa-brain"></i>
+                </div>
+                <div class="orbiting-elements">
+                  <div class="orbit-element weather"><i class="fas fa-cloud-sun"></i></div>
+                  <div class="orbit-element health"><i class="fas fa-heartbeat"></i></div>
+                  <div class="orbit-element finance"><i class="fas fa-chart-line"></i></div>
+                  <div class="orbit-element wine"><i class="fas fa-wine-glass-alt"></i></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="features-section">
+      <div class="container">
+        <div class="text-center mb-5">
+          <h2 class="display-4 fw-bold mb-3">Powerful ML Applications</h2>
+          <p class="lead text-muted">Explore how machine learning revolutionizes various industries</p>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="feature-card" data-aos="fade-up">
+              <div class="feature-icon weather">
+                <i class="fas fa-cloud-sun"></i>
+              </div>
+              <h3>Weather Prediction</h3>
+              <p>Advanced ML models analyze historical data and satellite imagery to provide accurate weather forecasts and climate insights.</p>
+              <ul class="feature-list">
+                <li><i class="fas fa-check"></i> Temperature trend analysis</li>
+                <li><i class="fas fa-check"></i> Storm prediction systems</li>
+                <li><i class="fas fa-check"></i> Climate change modeling</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+              <div class="feature-icon health">
+                <i class="fas fa-heartbeat"></i>
+              </div>
+              <h3>Health Diagnostics</h3>
+              <p>AI-powered medical imaging and diagnostic tools that enable early detection and personalized treatment plans.</p>
+              <ul class="feature-list">
+                <li><i class="fas fa-check"></i> Malaria detection</li>
+                <li><i class="fas fa-check"></i> Disease prediction</li>
+                <li><i class="fas fa-check"></i> Treatment optimization</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+              <div class="feature-icon wine">
+                <i class="fas fa-wine-glass-alt"></i>
+              </div>
+              <h3>Wine Quality</h3>
+              <p>Machine learning algorithms that analyze chemical composition to predict wine quality and optimal aging periods.</p>
+              <ul class="feature-list">
+                <li><i class="fas fa-check"></i> Quality scoring</li>
+                <li><i class="fas fa-check"></i> Price prediction</li>
+                <li><i class="fas fa-check"></i> Composition analysis</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+              <div class="feature-icon finance">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <h3>Financial Analytics</h3>
+              <p>Intelligent systems for market analysis, risk assessment, fraud detection, and investment optimization.</p>
+              <ul class="feature-list">
+                <li><i class="fas fa-check"></i> Stock prediction</li>
+                <li><i class="fas fa-check"></i> Fraud detection</li>
+                <li><i class="fas fa-check"></i> Portfolio management</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="demos" class="demos-section">
+      <div class="container">
+        <div class="text-center mb-5">
+          <h2 class="display-4 fw-bold mb-3">Interactive Demos</h2>
+          <p class="lead text-muted">Experience machine learning in action</p>
+        </div>
+
+        <div class="demo-container">
+          <div class="demo-card weather-demo">
+            <div class="demo-content">
+              <h3><i class="fas fa-cloud-sun me-2"></i>Weather Predictor</h3>
+              <p>Predict weather conditions based on historical data</p>
+              <div class="demo-controls">
+                <input type="number" id="temperature" placeholder="Temperature (°C)" class="form-control mb-2">
+                <input type="number" id="humidity" placeholder="Humidity (%)" class="form-control mb-2">
+                <button onclick="predictWeather()" class="btn btn-primary">Predict</button>
+              </div>
+              <div id="weather-result" class="demo-result"></div>
+            </div>
+          </div>
+
+          <div class="demo-card wine-demo">
+            <div class="demo-content">
+              <h3><i class="fas fa-wine-glass-alt me-2"></i>Wine Quality Assessor</h3>
+              <p>Estimate wine quality based on chemical properties</p>
+              <div class="demo-controls">
+                <input type="number" id="alcohol" placeholder="Alcohol Content" step="0.1" class="form-control mb-2">
+                <input type="number" id="acidity" placeholder="Acidity Level" step="0.01" class="form-control mb-2">
+                <button onclick="assessWine()" class="btn btn-primary">Assess Quality</button>
+              </div>
+              <div id="wine-result" class="demo-result"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="about-section">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-lg-6">
+            <h2 class="display-4 fw-bold mb-4">About ML Everywhere</h2>
+            <p class="lead mb-4">
+              We're dedicated to making machine learning accessible and demonstrating its practical applications
+              in everyday life. Our platform showcases how AI can solve real-world problems across various domains.
+            </p>
+            <div class="stats">
+              <div class="stat">
+                <h3>10+</h3>
+                <p>Models Trained</p>
+              </div>
+              <div class="stat">
+                <h3>95%</h3>
+                <p>Accuracy Rate</p>
+              </div>
+              <div class="stat">
+                <h3>24/7</h3>
+                <p>AI Processing</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="about-visual">
+              <div class="visual-element">
+                <i class="fas fa-robot"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4">
+            <h5>ML Everywhere</h5>
+            <p>Making artificial intelligence accessible and practical for everyday use.</p>
+          </div>
+          <div class="col-lg-4">
+            <h5>Quick Links</h5>
+            <ul class="footer-links">
+              <li><a href="#home">Home</a></li>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#demos">Demos</a></li>
+              <li><a href="#about">About</a></li>
+            </ul>
+          </div>
+          <div class="col-lg-4">
+            <h5>Connect</h5>
+            <div class="social-links">
+              <a href="#"><i class="fab fa-github"></i></a>
+              <a href="#"><i class="fab fa-twitter"></i></a>
+              <a href="#"><i class="fab fa-linkedin"></i></a>
+              <a href="#"><i class="fab fa-discord"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2024 ML Everywhere. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="loginModalLabel">Log In</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="loginForm">
+              <div class="mb-3">
+                <label for="loginEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="loginEmail" required>
+              </div>
+              <div class="mb-3">
+                <label for="loginPassword" class="form-label">Password</label>
+                <input type="password" class="form-control" id="loginPassword" required>
+              </div>
+              <div class="alert d-none" id="loginFeedback"></div>
+              <button type="submit" class="btn btn-primary w-100">Sign In</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="signupModalLabel">Create Account</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="signupForm">
+              <div class="mb-3">
+                <label for="signupName" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="signupName" required>
+              </div>
+              <div class="mb-3">
+                <label for="signupEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="signupEmail" required>
+              </div>
+              <div class="mb-3">
+                <label for="signupPassword" class="form-label">Password</label>
+                <input type="password" class="form-control" id="signupPassword" minlength="8" required>
+              </div>
+              <div class="alert d-none" id="signupFeedback"></div>
+              <button type="submit" class="btn btn-primary w-100">Create Account</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+  </body>
+</html>
