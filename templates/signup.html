@@ -9,7 +9,7 @@
 <body>
 <div class="container mt-5">
     <h2 class="mb-4">Create Account</h2>
-    <form id="signupFormPage">
+    <form id="signupFormPage" method="post" action="{% url 'signup_page' %}">
     {% csrf_token %}
     {% if error %}
     <div class="alert alert-danger">{{ error }}</div>

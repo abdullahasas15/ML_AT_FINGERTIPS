@@ -9,7 +9,11 @@
 <body>
 <div class="container mt-5">
     <h2 class="mb-4">Log In</h2>
-    <form id="loginFormPage">
+    <form id="loginFormPage" method="post" action="{% url 'login_page' %}">
+        {% csrf_token %}
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
         <div class="mb-3">
             <label for="loginEmailPage" class="form-label">Email</label>
               <input type="email" class="form-control" id="loginEmailPage" name="email" required>

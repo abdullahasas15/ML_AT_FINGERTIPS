@@ -1,10 +1,3 @@
-from django.shortcuts import render
-
-def signup_page(request):
-    return render(request, 'signup.html')
-
-def login_page(request):
-    return render(request, 'login.html')
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from .models import User
@@ -20,12 +13,18 @@ def signup_page(request):
             return render(request, 'signup.html', {'error': 'All fields required.'})
         if User.objects.filter(email=email).exists():
             return render(request, 'signup.html', {'error': 'Email already exists.'})
+        # Split full name into first and last name
+        name_parts = full_name.strip().split(' ', 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ''
+        
         user = User.objects.create(
             username=email,
             email=email,
             password=make_password(password),
             favorite_ml_type=favorite_ml_type,
-            first_name=full_name
+            first_name=first_name,
+            last_name=last_name
         )
         login(request, user)
         return redirect('/base2')

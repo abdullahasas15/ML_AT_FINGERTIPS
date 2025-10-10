@@ -34,10 +34,10 @@
               <a class="nav-link" href="#about">About</a>
             </li>
             <li class="nav-item">
-              <a class="btn btn-outline-light ms-2" href="/login">Log In</a>
+              <a class="btn btn-outline-light ms-2" href="{% url 'login_page' %}">Log In</a>
             </li>
             <li class="nav-item">
-              <a class="btn btn-primary ms-2" href="/signup">Sign Up</a>
+              <a class="btn btn-primary ms-2" href="{% url 'signup_page' %}">Sign Up</a>
             </li>
           </ul>
         </div>
@@ -266,14 +266,15 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form id="loginForm">
+            <form id="loginForm" method="post" action="{% url 'login_page' %}">
+              {% csrf_token %}
               <div class="mb-3">
                 <label for="loginEmail" class="form-label">Email</label>
-                <input type="email" class="form-control" id="loginEmail" required>
+                <input type="email" class="form-control" id="loginEmail" name="email" required>
               </div>
               <div class="mb-3">
                 <label for="loginPassword" class="form-label">Password</label>
-                <input type="password" class="form-control" id="loginPassword" required>
+                <input type="password" class="form-control" id="loginPassword" name="password" required>
               </div>
               <div class="alert d-none" id="loginFeedback"></div>
               <button type="submit" class="btn btn-primary w-100">Sign In</button>
@@ -291,22 +292,23 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form id="signupForm">
+            <form id="signupForm" method="post" action="{% url 'signup_page' %}">
+              {% csrf_token %}
               <div class="mb-3">
                 <label for="signupName" class="form-label">Full Name</label>
-                <input type="text" class="form-control" id="signupName" required>
+                <input type="text" class="form-control" id="signupName" name="full_name" required>
               </div>
               <div class="mb-3">
                 <label for="signupEmail" class="form-label">Email</label>
-                <input type="email" class="form-control" id="signupEmail" required>
+                <input type="email" class="form-control" id="signupEmail" name="email" required>
               </div>
               <div class="mb-3">
                 <label for="signupPassword" class="form-label">Password</label>
-                <input type="password" class="form-control" id="signupPassword" minlength="8" required>
+                <input type="password" class="form-control" id="signupPassword" name="password" minlength="8" required>
               </div>
               <div class="mb-3">
                 <label for="signupFavoriteML" class="form-label">Favorite ML Type</label>
-                <select class="form-control" id="signupFavoriteML" required>
+                <select class="form-control" id="signupFavoriteML" name="favorite_ml_type" required>
                   <option value="">Select...</option>
                   <option value="classification">Classification</option>
                   <option value="regression">Regression</option>
