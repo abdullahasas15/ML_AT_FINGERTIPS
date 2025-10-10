@@ -34,10 +34,10 @@
               <a class="nav-link" href="#about">About</a>
             </li>
             <li class="nav-item">
-              <button class="btn btn-outline-light ms-2" data-bs-toggle="modal" data-bs-target="#loginModal">Log In</button>
+              <a class="btn btn-outline-light ms-2" href="/login">Log In</a>
             </li>
             <li class="nav-item">
-              <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#signupModal">Sign Up</button>
+              <a class="btn btn-primary ms-2" href="/signup">Sign Up</a>
             </li>
           </ul>
         </div>
@@ -303,6 +303,15 @@
               <div class="mb-3">
                 <label for="signupPassword" class="form-label">Password</label>
                 <input type="password" class="form-control" id="signupPassword" minlength="8" required>
+              </div>
+              <div class="mb-3">
+                <label for="signupFavoriteML" class="form-label">Favorite ML Type</label>
+                <select class="form-control" id="signupFavoriteML" required>
+                  <option value="">Select...</option>
+                  <option value="classification">Classification</option>
+                  <option value="regression">Regression</option>
+                  <option value="random_trees">Random Trees</option>
+                </select>
               </div>
               <div class="alert d-none" id="signupFeedback"></div>
               <button type="submit" class="btn btn-primary w-100">Create Account</button>

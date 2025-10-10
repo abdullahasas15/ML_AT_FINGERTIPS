@@ -138,85 +138,23 @@ function initDemos() {
 }
 
 function initAuthForms() {
-    const loginForm = document.getElementById('loginForm');
-    const signupForm = document.getElementById('signupForm');
-    const loginFeedback = document.getElementById('loginFeedback');
-    const signupFeedback = document.getElementById('signupFeedback');
-
-    if (signupForm) {
-        signupForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            signupFeedback.classList.add('d-none');
-            signupFeedback.textContent = '';
-
-            const payload = {
-                name: document.getElementById('signupName').value,
-                email: document.getElementById('signupEmail').value,
-                password: document.getElementById('signupPassword').value
-            };
-
-            try {
-                const response = await fetch('/api/signup/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const data = await response.json();
-                signupFeedback.classList.remove('d-none');
-                signupFeedback.classList.toggle('alert-success', response.ok);
-                signupFeedback.classList.toggle('alert-danger', !response.ok);
-                signupFeedback.textContent = data.message || 'Account created successfully.';
-
-                if (response.ok) {
-                    signupForm.reset();
+    // CSRF token helper
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
-            } catch (error) {
-                signupFeedback.classList.remove('d-none');
-                signupFeedback.classList.add('alert-danger');
-                signupFeedback.textContent = 'Unable to sign up right now. Please try again later.';
             }
-        });
+        }
+        return cookieValue;
     }
-
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            loginFeedback.classList.add('d-none');
-            loginFeedback.textContent = '';
-
-            const payload = {
-                email: document.getElementById('loginEmail').value,
-                password: document.getElementById('loginPassword').value
-            };
-
-            try {
-                const response = await fetch('/api/login/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const data = await response.json();
-                loginFeedback.classList.remove('d-none');
-                loginFeedback.classList.toggle('alert-success', response.ok);
-                loginFeedback.classList.toggle('alert-danger', !response.ok);
-                loginFeedback.textContent = data.message || 'Logged in successfully.';
-
-                if (response.ok) {
-                    loginForm.reset();
-                }
-            } catch (error) {
-                loginFeedback.classList.remove('d-none');
-                loginFeedback.classList.add('alert-danger');
-                loginFeedback.textContent = 'Unable to log in right now. Please try again later.';
-            }
-        });
-    }
+    const csrftoken = getCookie('csrftoken');
+    // No custom JS for login/signup forms; Django handles POST natively
 }
 
 function initAnimations() {
