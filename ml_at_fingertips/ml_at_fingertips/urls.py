@@ -25,4 +25,5 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='base.html'), name='home'),
     path('base2/', TemplateView.as_view(template_name='base2.html'), name='base2'),
     path('accounts/', include('accounts.urls')),
+    path('classifier/', include('classifier.urls')),
 ]
