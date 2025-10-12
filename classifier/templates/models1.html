@@ -293,36 +293,18 @@
         {% if problems %}
         <div class="problems-grid">
             {% for problem in problems %}
-            <div class="problem-card">
-                <div class="problem-card-header">
-                    <div class="problem-icon">
-                        <i class="fas fa-heartbeat"></i>
+            <div class="problem-card" style="padding:1rem 1.25rem; display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <div style="width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;color:white;">
+                        <i class="fas fa-question"></i>
                     </div>
-                    <div class="problem-type-badge">
-                        {{ problem.model_type }}
-                    </div>
-                </div>
-                <div class="problem-card-content">
-                    <h3 class="problem-title">{{ problem.title }}</h3>
-                    <p class="problem-description">
-                        {{ problem.description|truncatewords:25 }}
-                    </p>
-                    <div class="problem-stats">
-                        <div class="stat">
-                            <i class="fas fa-brain"></i>
-                            <span>{{ problem.selected_model }}</span>
-                        </div>
-                        <div class="stat">
-                            <i class="fas fa-chart-line"></i>
-                            <span>{{ problem.accuracy_scores|get_item:problem.selected_model|floatformat:0 }}% Accuracy</span>
-                        </div>
+                    <div>
+                        <a href="{% url 'model_detail_view' problem.id %}" style="text-decoration:none;color:#333;font-size:1.05rem;font-weight:600;">{{ problem.title }}</a>
+                        <div style="color:#666;font-size:0.9rem;">{{ problem.description|truncatewords:12 }}</div>
                     </div>
                 </div>
-                <div class="problem-card-footer">
-                    <a href="{% url 'model_detail_view' problem.id %}" class="use-model-btn">
-                        <i class="fas fa-play"></i>
-                        Use Model
-                    </a>
+                <div>
+                    <a href="{% url 'model_detail_view' problem.id %}" class="btn">Try</a>
                 </div>
             </div>
             {% endfor %}

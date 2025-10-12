@@ -235,6 +235,16 @@
             background: white;
             min-height: 58px;
         }
+
+        /* Helper: full description under inputs (prevents truncation) */
+        .feature-desc {
+            margin-top: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.3;
+            white-space: normal; /* allow wrapping */
+            word-break: break-word;
+        }
         
         .form-group input:focus,
         .form-group select:focus {
@@ -536,7 +546,7 @@
         <div class="nav-actions">
             <a href="{% url 'models1_view' %}" class="nav-btn back-btn">
                 <i class="fas fa-arrow-left"></i>
-                Back to Models
+                Back to Problem Statements
             </a>
             <a href="/accounts/logout/" class="nav-btn logout-btn">
                 <i class="fas fa-sign-out-alt"></i>
@@ -573,7 +583,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for row in problem.dataset_sample %}
+                        {# Show only first two rows to build curiosity #}
+                        {% for row in problem.dataset_sample|slice:":2" %}
                         <tr>
                             {% for value in row.values %}
                                 <td>{{ value }}</td>
@@ -593,16 +604,27 @@
                 </div>
                 <h2 class="card-title">Make Prediction</h2>
             </div>
-            
-            <form id="predictionForm">
-                <div class="form-grid">
+            <!-- Step 1: confirmation + Try Model button. Inputs hidden until user opts in -->
+            <div id="confirmation" style="padding:1rem 0;">
+                <div style="background:#f0f9ff;border-left:4px solid #667eea;padding:1rem;border-radius:8px;">
+                    <strong>Great — we have this problem:</strong>
+                    <div style="margin-top:0.5rem;">You can try predicting with our model. Click <em>Try Model</em> to see input fields and run a prediction.</div>
+                </div>
+                <div style="margin-top:1rem;text-align:center;">
+                    <button class="btn" id="tryModelBtn"><i class="fas fa-play"></i> Try Model</button>
+                </div>
+            </div>
+
+            <!-- Hidden form: revealed after clicking Try Model -->
+            <form id="predictionForm" style="display:none;">
+                <div class="form-grid" id="featuresGrid">
                     {% for feature, description in problem.features_description.items %}
                     <div class="form-group">
                         <label for="{{ feature }}">
-                            <i class="fas fa-{{ feature|slice:':1'|lower }}"></i>
                             {{ feature|title }}
                         </label>
-                        <input type="number" id="{{ feature }}" name="{{ feature }}" step="any" required placeholder="{{ description }}">
+                        <input type="number" id="{{ feature }}" name="{{ feature }}" step="any" required title="{{ description }}">
+                        <div class="feature-desc">{{ description }}</div>
                     </div>
                     {% endfor %}
                 </div>
@@ -682,21 +704,29 @@
     </div>
     
     <script>
+        // Toggle to reveal the input form when user clicks Try Model
+        document.getElementById('tryModelBtn').addEventListener('click', function() {
+            document.getElementById('confirmation').style.display = 'none';
+            document.getElementById('predictionForm').style.display = 'block';
+            // Scroll to form
+            document.getElementById('predictionForm').scrollIntoView({ behavior: 'smooth' });
+        });
+
         document.getElementById('predictionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const formData = new FormData(this);
             const features = {};
-            
+
             for (let [key, value] of formData.entries()) {
                 features[key] = parseFloat(value);
             }
-            
+
             // Show loading
             document.getElementById('loading').style.display = 'block';
             document.getElementById('results').style.display = 'none';
             document.getElementById('predictBtn').disabled = true;
-            
+
             try {
                 const response = await fetch(`/classifier/predict/{{ problem.id }}/`, {
                     method: 'POST',
@@ -706,9 +736,9 @@
                     },
                     body: JSON.stringify({ features: features })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     displayResults(data);
                 } else {
