@@ -1,0 +1,1 @@
+# Ensure Django recognizes this as a package for custom template tags.

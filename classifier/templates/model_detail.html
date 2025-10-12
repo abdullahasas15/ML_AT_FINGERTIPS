@@ -233,6 +233,7 @@
             font-size: 1rem;
             transition: all 0.3s ease;
             background: white;
+            min-height: 58px;
         }
         
         .form-group input:focus,
@@ -420,12 +421,17 @@
             border-radius: 15px;
             background: #f8f9ff;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 160px;
         }
         
         .accuracy-item.selected {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.25);
         }
         
         .accuracy-score {
@@ -643,7 +649,7 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">Accuracy</div>
-                    <div class="info-value">{{ problem.accuracy_scores|get_item:problem.selected_model|floatformat:1 }}%</div>
+                    <div class="info-value">{{ problem.accuracy_scores|get_item:problem.selected_model|percentage:1 }}</div>
                 </div>
             </div>
             
@@ -657,7 +663,7 @@
                 <div class="accuracy-comparison">
                     {% for model_name, accuracy in problem.accuracy_scores.items %}
                     <div class="accuracy-item {% if model_name == problem.selected_model %}selected{% endif %}">
-                        <div class="accuracy-score">{{ accuracy|floatformat:0 }}%</div>
+                        <div class="accuracy-score">{{ accuracy|percentage:0 }}</div>
                         <div class="model-name">{{ model_name }}</div>
                     </div>
                     {% endfor %}
