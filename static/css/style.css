@@ -229,6 +229,24 @@ body {
   transform: translateY(-5px);
 }
 
+.health-demo {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  color: white;
+}
+
+.health-demo:hover {
+  border-color: #ff6b6b;
+}
+
+.transport-demo {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.transport-demo:hover {
+  border-color: #667eea;
+}
+
 .demo-content h3 {
   color: var(--text-dark);
   margin-bottom: 1rem;

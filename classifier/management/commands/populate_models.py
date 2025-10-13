@@ -7,8 +7,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Heart Disease Risk Management Problem Statement
         heart_disease_data = {
-            'title': 'Heart Disease Risk Management',
-            'description': 'Predict the risk of heart disease based on various health parameters including age, blood pressure, cholesterol levels, and other medical indicators. This model helps in early detection and prevention of cardiovascular diseases.',
+            'title': 'Can We Predict Heart Risk Management with ML?',
+            'description': 'Ever wondered if we can predict heart disease before it strikes? Our advanced ML model analyzes your health parameters like age, blood pressure, cholesterol levels, and other medical indicators to provide early risk assessment. Discover how artificial intelligence can help save lives through preventive healthcare!',
             'dataset_sample': [
                 {
                     'age': 63,

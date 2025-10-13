@@ -107,7 +107,7 @@
             width: 80px;
             height: 80px;
             margin: 0 auto 1.5rem;
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -323,17 +323,17 @@
             font-weight: 600;
         }
         
-        .high-risk {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            color: white;
-        }
-        
-        .low-risk {
+        .fast-eta {
             background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
             color: white;
         }
         
-        .risk-icon {
+        .slow-eta {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+        
+        .eta-icon {
             font-size: 2rem;
         }
         
@@ -373,12 +373,12 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
         }
         
-        .factor-item.high-risk {
+        .factor-item.high-impact {
             border-left-color: #ff6b6b;
             background: linear-gradient(135deg, #fff5f5 0%, #ffeaea 100%);
         }
         
-        .factor-item.low-risk {
+        .factor-item.low-impact {
             border-left-color: #27ae60;
             background: linear-gradient(135deg, #f0fff4 0%, #e6ffe6 100%);
         }
@@ -490,7 +490,7 @@
         }
         
         .recommendations-content li::before {
-            content: "💡";
+            content: "🚗";
             position: absolute;
             left: 0;
         }
@@ -659,11 +659,11 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-brand">
-            <i class="fas fa-heartbeat"></i>
+            <i class="fas fa-route"></i>
             ML at Fingertips
         </div>
         <div class="nav-actions">
-            <a href="{% url 'models1_view' %}" class="nav-btn back-btn">
+            <a href="{% url 'models2_view' %}" class="nav-btn back-btn">
                 <i class="fas fa-arrow-left"></i>
                 Back to Problem Statements
             </a>
@@ -678,7 +678,7 @@
         <!-- Header -->
         <div class="header">
             <div class="header-icon">
-                <i class="fas fa-heartbeat"></i>
+                <i class="fas fa-route"></i>
             </div>
             <h1>{{ problem.title }}</h1>
             <p class="description">{{ problem.description }}</p>
@@ -860,7 +860,7 @@
             document.getElementById('predictBtn').disabled = true;
 
             try {
-                const response = await fetch(`/classifier/predict/{{ problem.id }}/`, {
+                const response = await fetch(`/regressor/predict/{{ problem.id }}/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -889,22 +889,33 @@
             const recommendationsText = document.getElementById('recommendationsText');
             const featureFactors = document.getElementById('featureFactors');
             
-            if (data.prediction === 1) {
-                predictionResult.className = 'prediction-result high-risk';
+            const etaMinutes = Math.round(data.prediction);
+            
+            if (etaMinutes <= 15) {
+                predictionResult.className = 'prediction-result fast-eta';
                 predictionResult.innerHTML = `
-                    <i class="fas fa-exclamation-triangle risk-icon"></i>
+                    <i class="fas fa-tachometer-alt eta-icon"></i>
                     <div>
-                        <div>High Risk Detected</div>
-                        <small>Please consult with a healthcare professional</small>
+                        <div>Fast ETA: ${etaMinutes} minutes</div>
+                        <small>Great timing! Traffic is light</small>
+                    </div>
+                `;
+            } else if (etaMinutes <= 30) {
+                predictionResult.className = 'prediction-result fast-eta';
+                predictionResult.innerHTML = `
+                    <i class="fas fa-clock eta-icon"></i>
+                    <div>
+                        <div>Moderate ETA: ${etaMinutes} minutes</div>
+                        <small>Normal traffic conditions</small>
                     </div>
                 `;
             } else {
-                predictionResult.className = 'prediction-result low-risk';
+                predictionResult.className = 'prediction-result slow-eta';
                 predictionResult.innerHTML = `
-                    <i class="fas fa-check-circle risk-icon"></i>
+                    <i class="fas fa-traffic-light eta-icon"></i>
                     <div>
-                        <div>Low Risk</div>
-                        <small>Continue maintaining a healthy lifestyle</small>
+                        <div>Longer ETA: ${etaMinutes} minutes</div>
+                        <small>Heavy traffic expected</small>
                     </div>
                 `;
             }
@@ -920,38 +931,25 @@
             }
             
             // Display feature importance
-            displayFeatureImportance(data.feature_importance, featureFactors, data.prediction);
+            displayFeatureImportance(data.feature_importance, featureFactors, etaMinutes);
             
             // Format recommendations with proper bullet points
             formatRecommendations(data.recommendations, recommendationsText);
             document.getElementById('results').style.display = 'block';
         }
         
-        function displayFeatureImportance(featureImportance, container, prediction) {
+        function displayFeatureImportance(featureImportance, container, etaMinutes) {
             // Feature descriptions for better user understanding
             const featureDescriptions = {
-                'age': 'Age is a significant risk factor for heart disease',
-                'sex': 'Gender can influence heart disease risk patterns',
-                'cp': 'Chest pain type indicates potential heart issues',
-                'trestbps': 'Resting blood pressure above 140 is considered high',
-                'chol': 'Cholesterol levels above 240 mg/dl increase risk',
-                'fbs': 'Fasting blood sugar above 126 mg/dl indicates diabetes risk',
-                'restecg': 'Resting ECG results can show heart abnormalities',
-                'thalach': 'Maximum heart rate achieved during exercise',
-                'exang': 'Exercise-induced angina indicates reduced blood flow',
-                'oldpeak': 'ST depression indicates oxygen deprivation to heart muscle',
-                'slope': 'Slope of peak exercise ST segment',
-                'ca': 'Number of major vessels colored by fluoroscopy',
-                'thal': 'Thalassemia type affects blood oxygen carrying capacity'
-            };
-            
-            // Risk thresholds for different features
-            const riskThresholds = {
-                'age': { high: 60, medium: 45 },
-                'trestbps': { high: 140, medium: 130 },
-                'chol': { high: 240, medium: 200 },
-                'fbs': { high: 126, medium: 100 },
-                'oldpeak': { high: 2.0, medium: 1.0 }
+                'distance': 'Distance is a primary factor in travel time calculation',
+                'pickup_latitude': 'Pickup location affects initial routing and traffic conditions',
+                'pickup_longitude': 'Pickup coordinates determine starting point routing',
+                'dropoff_latitude': 'Destination latitude influences final route selection',
+                'dropoff_longitude': 'Destination longitude affects routing optimization',
+                'passenger_count': 'Number of passengers can affect vehicle performance',
+                'pickup_hour': 'Time of day significantly impacts traffic patterns',
+                'pickup_day': 'Day of week affects traffic volume and patterns',
+                'pickup_month': 'Seasonal variations in traffic and weather conditions'
             };
             
             let html = '';
@@ -964,40 +962,28 @@
                 const value = featureData.value;
                 const description = featureDescriptions[featureName] || `${featureName} is an important factor`;
                 
-                // Determine if this feature contributes to risk
+                // Determine if this feature contributes to longer ETA
                 let impactClass = 'neutral';
                 let impactText = 'Moderate influence';
                 
-                if (prediction === 1) { // High risk prediction
-                    const threshold = riskThresholds[featureName];
-                    if (threshold) {
-                        if (value >= threshold.high) {
-                            impactClass = 'positive';
-                            impactText = 'High risk factor';
-                        } else if (value >= threshold.medium) {
-                            impactClass = 'positive';
-                            impactText = 'Moderate risk factor';
-                        } else {
-                            impactClass = 'negative';
-                            impactText = 'Low risk factor';
-                        }
+                if (etaMinutes > 25) { // Longer ETA
+                    if (featureName === 'distance' && value > 5) {
+                        impactClass = 'high-impact';
+                        impactText = 'High impact factor';
+                    } else if (featureName === 'pickup_hour' && (value >= 17 || value <= 9)) {
+                        impactClass = 'high-impact';
+                        impactText = 'Peak hour impact';
                     } else {
-                        impactClass = 'positive';
-                        impactText = 'Risk contributing factor';
+                        impactClass = 'high-impact';
+                        impactText = 'Time extending factor';
                     }
-                } else { // Low risk prediction
-                    const threshold = riskThresholds[featureName];
-                    if (threshold) {
-                        if (value < threshold.medium) {
-                            impactClass = 'negative';
-                            impactText = 'Protective factor';
-                        } else {
-                            impactClass = 'neutral';
-                            impactText = 'Neutral factor';
-                        }
+                } else { // Shorter ETA
+                    if (featureName === 'distance' && value < 3) {
+                        impactClass = 'low-impact';
+                        impactText = 'Short distance benefit';
                     } else {
-                        impactClass = 'negative';
-                        impactText = 'Low risk factor';
+                        impactClass = 'low-impact';
+                        impactText = 'Favorable factor';
                     }
                 }
                 
@@ -1006,7 +992,7 @@
                 const importancePercentage = (importance / maxImportance) * 100;
                 
                 html += `
-                    <div class="factor-item ${impactClass === 'positive' ? 'high-risk' : 'low-risk'}">
+                    <div class="factor-item ${impactClass === 'high-impact' ? 'high-impact' : 'low-impact'}">
                         <div class="factor-header">
                             <div class="factor-name">${featureName.charAt(0).toUpperCase() + featureName.slice(1)}</div>
                             <div class="factor-value">${value}</div>
@@ -1018,7 +1004,7 @@
                             <div class="importance-score">${(importance * 100).toFixed(1)}%</div>
                         </div>
                         <div class="factor-description">${description}</div>
-                        <div class="factor-impact ${impactClass}">${impactText}</div>
+                        <div class="factor-impact ${impactClass === 'high-impact' ? 'positive' : 'negative'}">${impactText}</div>
                     </div>
                 `;
             });

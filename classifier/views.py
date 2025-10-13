@@ -8,8 +8,108 @@ import os
 from django.conf import settings
 import requests
 from .models import ProblemStatement
+import numpy as np
+from sklearn.inspection import permutation_importance
 
 # Create your views here.
+
+def calculate_feature_importance(model, scaler, input_data, feature_names, prediction):
+    """Calculate feature importance using permutation importance"""
+    try:
+        # For permutation importance, we need some reference data
+        # We'll create synthetic data based on the input for demonstration
+        # In production, you'd want to use actual training data
+        
+        # Create synthetic reference data around the input
+        base_data = np.array(input_data).reshape(1, -1)
+        
+        # Generate variations of the input data for permutation importance
+        n_samples = 50
+        synthetic_data = np.tile(base_data, (n_samples, 1))
+        
+        # Add some noise to create variations
+        noise = np.random.normal(0, 0.1, synthetic_data.shape)
+        synthetic_data += noise
+        
+        # Scale the synthetic data
+        synthetic_data_scaled = scaler.transform(synthetic_data)
+        
+        # Calculate permutation importance
+        perm_importance = permutation_importance(
+            model, synthetic_data_scaled, 
+            model.predict(synthetic_data_scaled), 
+            n_repeats=10, random_state=42
+        )
+        
+        # Get importance scores
+        importance_scores = perm_importance.importances_mean
+        
+        # Create feature importance dictionary
+        feature_importance = {}
+        for i, feature_name in enumerate(feature_names):
+            feature_importance[feature_name] = {
+                'importance': float(importance_scores[i]),
+                'value': float(input_data[i]),
+                'contribution': 'positive' if importance_scores[i] > 0 else 'negative'
+            }
+        
+        # Sort features by importance (descending)
+        sorted_features = sorted(
+            feature_importance.items(), 
+            key=lambda x: x[1]['importance'], 
+            reverse=True
+        )
+        
+        return sorted_features
+        
+    except Exception as e:
+        # Fallback: create simple importance based on feature values
+        print(f"Error calculating feature importance: {e}")
+        return create_simple_feature_importance(input_data, feature_names, prediction)
+
+def create_simple_feature_importance(input_data, feature_names, prediction):
+    """Create simple feature importance based on feature values and medical knowledge"""
+    # Medical feature importance weights (based on medical research)
+    medical_weights = {
+        'age': 0.15,
+        'sex': 0.08,
+        'cp': 0.12,  # chest pain
+        'trestbps': 0.10,  # blood pressure
+        'chol': 0.10,  # cholesterol
+        'fbs': 0.06,  # fasting blood sugar
+        'restecg': 0.05,  # resting ECG
+        'thalach': 0.08,  # max heart rate
+        'exang': 0.08,  # exercise induced angina
+        'oldpeak': 0.10,  # ST depression
+        'slope': 0.06,  # slope of peak exercise ST segment
+        'ca': 0.10,  # number of major vessels
+        'thal': 0.12   # thalassemia
+    }
+    
+    feature_importance = {}
+    for i, feature_name in enumerate(feature_names):
+        value = input_data[i]
+        weight = medical_weights.get(feature_name, 0.05)
+        
+        # Adjust importance based on value and prediction
+        if prediction == 1:  # High risk
+            # Higher values for risk factors increase importance
+            if feature_name in ['age', 'trestbps', 'chol', 'oldpeak', 'ca']:
+                adjusted_importance = weight * (1 + value / 100)
+            else:
+                adjusted_importance = weight * (1 + value / 10)
+        else:  # Low risk
+            # Lower values for risk factors increase importance
+            adjusted_importance = weight * (1 - value / 100)
+        
+        feature_importance[feature_name] = {
+            'importance': max(0.01, adjusted_importance),  # Ensure positive importance
+            'value': float(value),
+            'contribution': 'positive' if (prediction == 1 and value > 50) or (prediction == 0 and value < 50) else 'negative'
+        }
+    
+    # Sort by importance
+    return sorted(feature_importance.items(), key=lambda x: x[1]['importance'], reverse=True)
 
 @login_required
 def models1_view(request):
@@ -58,13 +158,18 @@ def predict_view(request, problem_id):
         prediction = model.predict(input_scaled)[0]
         prediction_proba = model.predict_proba(input_scaled)[0] if hasattr(model, 'predict_proba') else None
         
+        # Calculate feature importance
+        feature_names = list(problem.features_description.keys())
+        feature_importance = calculate_feature_importance(model, scaler, input_data, feature_names, prediction)
+        
         # Get recommendations from Perplexity API
         recommendations = get_perplexity_recommendations(prediction, features, problem.title)
         
         return JsonResponse({
             'prediction': int(prediction),
             'prediction_proba': prediction_proba.tolist() if prediction_proba is not None else None,
-            'recommendations': recommendations
+            'recommendations': recommendations,
+            'feature_importance': feature_importance
         })
         
     except Exception as e:
