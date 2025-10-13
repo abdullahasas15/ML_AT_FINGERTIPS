@@ -145,9 +145,11 @@ body {
 }
 
 .orbit-element.weather { animation-delay: 0s; }
-.orbit-element.health { animation-delay: -1.5s; }
-.orbit-element.finance { animation-delay: -3s; }
-.orbit-element.wine { animation-delay: -4.5s; }
+.orbit-element.health { animation-delay: -1.666s; }
+.orbit-element.finance { animation-delay: -3.333s; }
+.orbit-element.wine { animation-delay: -5s; }
+.orbit-element.location { animation-delay: -6.666s; }
+.orbit-element.ml { animation-delay: -8.333s; }
 
 /* Features Section */
 .features-section {

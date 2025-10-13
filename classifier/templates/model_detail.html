@@ -678,10 +678,14 @@
         <!-- Header -->
         <div class="header">
             <div class="header-icon">
-                <i class="fas fa-heartbeat"></i>
+                {% if problem.title|lower contains "uber" or problem.title|lower contains "destination" or problem.title|lower contains "eta" %}
+                    <i class="fas fa-map-marker-alt" style="font-size:2.5rem;"></i>
+                {% else %}
+                    <i class="fas fa-heartbeat"></i>
+                {% endif %}
             </div>
-            <h1>{{ problem.title }}</h1>
-            <p class="description">{{ problem.description }}</p>
+            <h1 style="font-size:2.7rem;font-weight:800;letter-spacing:-1px;color:#222;margin-bottom:0.5rem;">{{ problem.title }}</h1>
+            <p class="description" style="font-size:1.15rem;color:#555;max-width:700px;margin:0 auto;">{{ problem.description }}</p>
         </div>
         
         <!-- Dataset Sample Card -->
@@ -717,11 +721,15 @@
         
         <!-- Prediction Form Card -->
         <div class="card">
-            <div class="card-header">
-                <div class="card-icon">
-                    <i class="fas fa-calculator"></i>
+            <div class="card-header" style="display:flex;align-items:center;gap:1rem;">
+                <div class="card-icon" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.5rem;">
+                    {% if problem.title|lower contains "uber" or problem.title|lower contains "destination" or problem.title|lower contains "eta" %}
+                        <i class="fas fa-map-marked-alt"></i>
+                    {% else %}
+                        <i class="fas fa-calculator"></i>
+                    {% endif %}
                 </div>
-                <h2 class="card-title">Make Prediction</h2>
+                <h2 class="card-title" style="font-size:1.35rem;font-weight:700;color:#333;">Make Prediction</h2>
             </div>
             <!-- Step 1: confirmation + Try Model button. Inputs hidden until user opts in -->
             <div id="confirmation" style="padding:1rem 0;">
@@ -737,15 +745,47 @@
             <!-- Hidden form: revealed after clicking Try Model -->
             <form id="predictionForm" style="display:none;">
                 <div class="form-grid" id="featuresGrid">
-                    {% for feature, description in problem.features_description.items %}
+                    <!-- Always include required DeepETA_DNN features -->
                     <div class="form-group">
-                        <label for="{{ feature }}">
-                            {{ feature|title }}
-                        </label>
-                        <input type="number" id="{{ feature }}" name="{{ feature }}" step="any" required title="{{ description }}">
-                        <div class="feature-desc">{{ description }}</div>
+                        <label for="pickup_longitude">Pickup Longitude</label>
+                        <input type="number" id="pickup_longitude" name="pickup_longitude" step="any" required title="Longitude of pickup location">
+                        <div class="feature-desc">Longitude of pickup location</div>
                     </div>
-                    {% endfor %}
+                    <div class="form-group">
+                        <label for="pickup_latitude">Pickup Latitude</label>
+                        <input type="number" id="pickup_latitude" name="pickup_latitude" step="any" required title="Latitude of pickup location">
+                        <div class="feature-desc">Latitude of pickup location</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dropoff_longitude">Dropoff Longitude</label>
+                        <input type="number" id="dropoff_longitude" name="dropoff_longitude" step="any" required title="Longitude of dropoff location">
+                        <div class="feature-desc">Longitude of dropoff location</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dropoff_latitude">Dropoff Latitude</label>
+                        <input type="number" id="dropoff_latitude" name="dropoff_latitude" step="any" required title="Latitude of dropoff location">
+                        <div class="feature-desc">Latitude of dropoff location</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="passenger_count">Passenger Count</label>
+                        <input type="number" id="passenger_count" name="passenger_count" step="any" required title="Number of passengers">
+                        <div class="feature-desc">Number of passengers</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="hour">Hour</label>
+                        <input type="number" id="hour" name="hour" step="any" required title="Hour of pickup">
+                        <div class="feature-desc">Hour of pickup</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dow">Day of Week</label>
+                        <input type="number" id="dow" name="dow" step="any" required title="Day of week (0=Monday)">
+                        <div class="feature-desc">Day of week (0=Monday)</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="month">Month</label>
+                        <input type="number" id="month" name="month" step="any" required title="Month (1-12)">
+                        <div class="feature-desc">Month (1-12)</div>
+                    </div>
                 </div>
                 <button type="submit" class="predict-btn" id="predictBtn">
                     <i class="fas fa-magic"></i>

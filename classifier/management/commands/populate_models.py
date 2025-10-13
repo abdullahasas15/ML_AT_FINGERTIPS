@@ -148,3 +148,70 @@ pickle.dump(scaler, open('scalerheart.pkl', 'wb'))'''
             self.stdout.write(
                 self.style.WARNING(f'Problem statement already exists: {problem.title}')
             )
+
+        # Uber ETA Regression Problem Statement
+        uber_eta_data = {
+            'title': 'How Uber Calculates Time to Reach Destination - Are You Curious?',
+            'description': 'Predict estimated time of arrival (ETA) for Uber rides based on route features like distance, coordinates, time of day, and passenger count.',
+            'dataset_sample': [
+                {
+                    'distance': 5.2,
+                    'pickup_latitude': 40.7589,
+                    'pickup_longitude': -73.9851,
+                    'dropoff_latitude': 40.7614,
+                    'dropoff_longitude': -73.9776,
+                    'passenger_count': 2,
+                    'pickup_hour': 14,
+                    'pickup_day': 3,
+                    'pickup_month': 6,
+                    'eta_minutes': 18.4
+                },
+                {
+                    'distance': 12.7,
+                    'pickup_latitude': 40.7128,
+                    'pickup_longitude': -74.0060,
+                    'dropoff_latitude': 40.7812,
+                    'dropoff_longitude': -73.9665,
+                    'passenger_count': 1,
+                    'pickup_hour': 18,
+                    'pickup_day': 5,
+                    'pickup_month': 11,
+                    'eta_minutes': 42.1
+                }
+            ],
+            'model_type': 'Regression',
+            'model_file': 'classifier/models1/deepeta_nyc_taxi.h5',
+            'scaler_file': '',
+            'features_description': {
+                'distance': 'Total trip distance in kilometers',
+                'pickup_latitude': 'Latitude coordinate of pickup location',
+                'pickup_longitude': 'Longitude coordinate of pickup location',
+                'dropoff_latitude': 'Latitude coordinate of dropoff location',
+                'dropoff_longitude': 'Longitude coordinate of dropoff location',
+                'passenger_count': 'Number of passengers',
+                'pickup_hour': 'Hour of pickup (0-23)',
+                'pickup_day': 'Day of week (1=Mon ... 7=Sun)',
+                'pickup_month': 'Month of pickup (1-12)'
+            },
+            'accuracy_scores': {
+                'DeepETA': 0.91,
+                'Random Forest': 0.83,
+                'Linear Regression': 0.74
+            },
+            'selected_model': 'DeepETA',
+            'code_snippet': 'Keras model serialized to H5; features scaled inside pipeline if required.'
+        }
+
+        uber_problem, uber_created = ProblemStatement.objects.get_or_create(
+            title=uber_eta_data['title'],
+            defaults=uber_eta_data
+        )
+
+        if uber_created:
+            self.stdout.write(self.style.SUCCESS(f'Successfully created problem statement: {uber_problem.title}'))
+        else:
+            # update fields which may have changed
+            for key, value in uber_eta_data.items():
+                setattr(uber_problem, key, value)
+            uber_problem.save()
+            self.stdout.write(self.style.WARNING(f'Updated existing problem statement: {uber_problem.title}'))

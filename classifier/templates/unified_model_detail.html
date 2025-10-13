@@ -323,6 +323,18 @@
             font-weight: 600;
         }
         
+        /* Classification results */
+        .high-risk {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+        
+        .low-risk {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+        }
+        
+        /* Regression results */
         .fast-eta {
             background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
             color: white;
@@ -333,7 +345,7 @@
             color: white;
         }
         
-        .eta-icon {
+        .prediction-icon {
             font-size: 2rem;
         }
         
@@ -490,7 +502,7 @@
         }
         
         .recommendations-content li::before {
-            content: "🚗";
+            content: "💡";
             position: absolute;
             left: 0;
         }
@@ -659,11 +671,11 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-brand">
-            <i class="fas fa-route"></i>
+            <i class="fas fa-brain"></i>
             ML at Fingertips
         </div>
         <div class="nav-actions">
-            <a href="{% url 'models2_view' %}" class="nav-btn back-btn">
+            <a href="{% url 'models1_view' %}" class="nav-btn back-btn">
                 <i class="fas fa-arrow-left"></i>
                 Back to Problem Statements
             </a>
@@ -678,7 +690,11 @@
         <!-- Header -->
         <div class="header">
             <div class="header-icon">
+                {% if problem.model_type.lower == 'regression' %}
                 <i class="fas fa-route"></i>
+                {% else %}
+                <i class="fas fa-heartbeat"></i>
+                {% endif %}
             </div>
             <h1>{{ problem.title }}</h1>
             <p class="description">{{ problem.description }}</p>
@@ -737,15 +753,47 @@
             <!-- Hidden form: revealed after clicking Try Model -->
             <form id="predictionForm" style="display:none;">
                 <div class="form-grid" id="featuresGrid">
-                    {% for feature, description in problem.features_description.items %}
+                    <!-- Always include required DeepETA_DNN features -->
                     <div class="form-group">
-                        <label for="{{ feature }}">
-                            {{ feature|title }}
-                        </label>
-                        <input type="number" id="{{ feature }}" name="{{ feature }}" step="any" required title="{{ description }}">
-                        <div class="feature-desc">{{ description }}</div>
+                        <label for="pickup_longitude">Pickup Longitude</label>
+                        <input type="number" id="pickup_longitude" name="pickup_longitude" step="any" required title="Longitude of pickup location">
+                        <div class="feature-desc">Longitude of pickup location</div>
                     </div>
-                    {% endfor %}
+                    <div class="form-group">
+                        <label for="pickup_latitude">Pickup Latitude</label>
+                        <input type="number" id="pickup_latitude" name="pickup_latitude" step="any" required title="Latitude of pickup location">
+                        <div class="feature-desc">Latitude of pickup location</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dropoff_longitude">Dropoff Longitude</label>
+                        <input type="number" id="dropoff_longitude" name="dropoff_longitude" step="any" required title="Longitude of dropoff location">
+                        <div class="feature-desc">Longitude of dropoff location</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dropoff_latitude">Dropoff Latitude</label>
+                        <input type="number" id="dropoff_latitude" name="dropoff_latitude" step="any" required title="Latitude of dropoff location">
+                        <div class="feature-desc">Latitude of dropoff location</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="passenger_count">Passenger Count</label>
+                        <input type="number" id="passenger_count" name="passenger_count" step="any" required title="Number of passengers">
+                        <div class="feature-desc">Number of passengers</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="hour">Hour</label>
+                        <input type="number" id="hour" name="hour" step="any" required title="Hour of pickup">
+                        <div class="feature-desc">Hour of pickup</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dow">Day of Week</label>
+                        <input type="number" id="dow" name="dow" step="any" required title="Day of week (0=Monday)">
+                        <div class="feature-desc">Day of week (0=Monday)</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="month">Month</label>
+                        <input type="number" id="month" name="month" step="any" required title="Month (1-12)">
+                        <div class="feature-desc">Month (1-12)</div>
+                    </div>
                 </div>
                 <button type="submit" class="predict-btn" id="predictBtn">
                     <i class="fas fa-magic"></i>
@@ -836,6 +884,9 @@
     </div>
     
     <script>
+        // Store model type for JavaScript
+        const modelType = "{{ problem.model_type|lower }}";
+        
         // Toggle to reveal the input form when user clicks Try Model
         document.getElementById('tryModelBtn').addEventListener('click', function() {
             document.getElementById('confirmation').style.display = 'none';
@@ -860,7 +911,7 @@
             document.getElementById('predictBtn').disabled = true;
 
             try {
-                const response = await fetch(`/regressor/predict/{{ problem.id }}/`, {
+                const response = await fetch(`/predict/{{ problem.id }}/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -889,35 +940,67 @@
             const recommendationsText = document.getElementById('recommendationsText');
             const featureFactors = document.getElementById('featureFactors');
             
-            const etaMinutes = Math.round(data.prediction);
-            
-            if (etaMinutes <= 15) {
-                predictionResult.className = 'prediction-result fast-eta';
-                predictionResult.innerHTML = `
-                    <i class="fas fa-tachometer-alt eta-icon"></i>
-                    <div>
-                        <div>Fast ETA: ${etaMinutes} minutes</div>
-                        <small>Great timing! Traffic is light</small>
-                    </div>
-                `;
-            } else if (etaMinutes <= 30) {
-                predictionResult.className = 'prediction-result fast-eta';
-                predictionResult.innerHTML = `
-                    <i class="fas fa-clock eta-icon"></i>
-                    <div>
-                        <div>Moderate ETA: ${etaMinutes} minutes</div>
-                        <small>Normal traffic conditions</small>
-                    </div>
-                `;
+            if (modelType === 'regression') {
+                // Handle regression results (ETA prediction)
+                const etaMinutes = Math.round(data.prediction);
+                
+                if (etaMinutes <= 15) {
+                    predictionResult.className = 'prediction-result fast-eta';
+                    predictionResult.innerHTML = `
+                        <i class="fas fa-tachometer-alt prediction-icon"></i>
+                        <div>
+                            <div>Fast ETA: ${etaMinutes} minutes</div>
+                            <small>Great timing! Traffic is light</small>
+                        </div>
+                    `;
+                } else if (etaMinutes <= 30) {
+                    predictionResult.className = 'prediction-result fast-eta';
+                    predictionResult.innerHTML = `
+                        <i class="fas fa-clock prediction-icon"></i>
+                        <div>
+                            <div>Moderate ETA: ${etaMinutes} minutes</div>
+                            <small>Normal traffic conditions</small>
+                        </div>
+                    `;
+                } else {
+                    predictionResult.className = 'prediction-result slow-eta';
+                    predictionResult.innerHTML = `
+                        <i class="fas fa-traffic-light prediction-icon"></i>
+                        <div>
+                            <div>Longer ETA: ${etaMinutes} minutes</div>
+                            <small>Heavy traffic expected</small>
+                        </div>
+                    `;
+                }
+                
+                // Display feature importance for regression
+                displayRegressionFeatureImportance(data.feature_importance, featureFactors, etaMinutes);
             } else {
-                predictionResult.className = 'prediction-result slow-eta';
-                predictionResult.innerHTML = `
-                    <i class="fas fa-traffic-light eta-icon"></i>
-                    <div>
-                        <div>Longer ETA: ${etaMinutes} minutes</div>
-                        <small>Heavy traffic expected</small>
-                    </div>
-                `;
+                // Handle classification results (Heart Disease)
+                const prediction = data.prediction;
+                
+                if (prediction === 1) {
+                    predictionResult.className = 'prediction-result high-risk';
+                    predictionResult.innerHTML = `
+                        <i class="fas fa-exclamation-triangle prediction-icon"></i>
+                        <div>
+                            <div>High Risk Detected</div>
+                            <small>Immediate attention recommended</small>
+                        </div>
+                    `;
+                } else {
+                    predictionResult.className = 'prediction-result low-risk';
+                    predictionResult.innerHTML = `
+                        <i class="fas fa-check-circle prediction-icon"></i>
+                        <div>
+                            <div>Low Risk Detected</div>
+                            <small>Continue maintaining healthy lifestyle</small>
+                        </div>
+                    `;
+                }
+                
+                // Display feature importance for classification
+                displayClassificationFeatureImportance(data.feature_importance, featureFactors, prediction);
             }
             
             if (data.prediction_proba) {
@@ -930,15 +1013,12 @@
                 predictionResult.appendChild(confidenceElement);
             }
             
-            // Display feature importance
-            displayFeatureImportance(data.feature_importance, featureFactors, etaMinutes);
-            
             // Format recommendations with proper bullet points
             formatRecommendations(data.recommendations, recommendationsText);
             document.getElementById('results').style.display = 'block';
         }
         
-        function displayFeatureImportance(featureImportance, container, etaMinutes) {
+        function displayRegressionFeatureImportance(featureImportance, container, etaMinutes) {
             // Feature descriptions for better user understanding
             const featureDescriptions = {
                 'distance': 'Distance is a primary factor in travel time calculation',
@@ -981,6 +1061,81 @@
                     if (featureName === 'distance' && value < 3) {
                         impactClass = 'low-impact';
                         impactText = 'Short distance benefit';
+                    } else {
+                        impactClass = 'low-impact';
+                        impactText = 'Favorable factor';
+                    }
+                }
+                
+                // Calculate importance percentage for visual bar
+                const maxImportance = Math.max(...featureImportance.map(([, data]) => data.importance));
+                const importancePercentage = (importance / maxImportance) * 100;
+                
+                html += `
+                    <div class="factor-item ${impactClass === 'high-impact' ? 'high-impact' : 'low-impact'}">
+                        <div class="factor-header">
+                            <div class="factor-name">${featureName.charAt(0).toUpperCase() + featureName.slice(1)}</div>
+                            <div class="factor-value">${value}</div>
+                        </div>
+                        <div class="factor-importance">
+                            <div class="importance-bar">
+                                <div class="importance-fill" style="width: ${importancePercentage}%"></div>
+                            </div>
+                            <div class="importance-score">${(importance * 100).toFixed(1)}%</div>
+                        </div>
+                        <div class="factor-description">${description}</div>
+                        <div class="factor-impact ${impactClass === 'high-impact' ? 'positive' : 'negative'}">${impactText}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function displayClassificationFeatureImportance(featureImportance, container, prediction) {
+            // Medical feature descriptions
+            const featureDescriptions = {
+                'age': 'Age is a significant risk factor for heart disease',
+                'sex': 'Gender affects heart disease risk patterns',
+                'cp': 'Chest pain type indicates different heart conditions',
+                'trestbps': 'Resting blood pressure is a major cardiovascular risk factor',
+                'chol': 'Cholesterol levels directly impact heart health',
+                'fbs': 'Fasting blood sugar indicates diabetes risk',
+                'restecg': 'Resting ECG results show heart electrical activity',
+                'thalach': 'Maximum heart rate achieved during exercise',
+                'exang': 'Exercise-induced angina indicates heart stress',
+                'oldpeak': 'ST depression indicates heart muscle stress',
+                'slope': 'Slope of peak exercise ST segment',
+                'ca': 'Number of major vessels colored by fluoroscopy',
+                'thal': 'Thalassemia type affects blood oxygen capacity'
+            };
+            
+            let html = '';
+            
+            // Show top 6 most important features
+            const topFeatures = featureImportance.slice(0, 6);
+            
+            topFeatures.forEach(([featureName, featureData]) => {
+                const importance = featureData.importance;
+                const value = featureData.value;
+                const description = featureDescriptions[featureName] || `${featureName} is an important factor`;
+                
+                // Determine impact based on prediction and medical knowledge
+                let impactClass = 'neutral';
+                let impactText = 'Moderate influence';
+                
+                if (prediction === 1) { // High risk
+                    if (['age', 'trestbps', 'chol', 'oldpeak', 'ca'].includes(featureName) && value > 50) {
+                        impactClass = 'high-impact';
+                        impactText = 'High risk factor';
+                    } else {
+                        impactClass = 'high-impact';
+                        impactText = 'Risk contributing factor';
+                    }
+                } else { // Low risk
+                    if (['age', 'trestbps', 'chol', 'oldpeak', 'ca'].includes(featureName) && value < 50) {
+                        impactClass = 'low-impact';
+                        impactText = 'Protective factor';
                     } else {
                         impactClass = 'low-impact';
                         impactText = 'Favorable factor';

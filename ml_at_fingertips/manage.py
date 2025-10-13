@@ -6,6 +6,12 @@ import sys
 
 def main():
     """Run administrative tasks."""
+    # Ensure the repository root (one level above this package) is on sys.path
+    # This makes sibling apps (e.g. classifier/, regressor/) importable
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if repo_root not in sys.path:
+        sys.path.insert(0, repo_root)
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ml_at_fingertips.settings')
     try:
         from django.core.management import execute_from_command_line

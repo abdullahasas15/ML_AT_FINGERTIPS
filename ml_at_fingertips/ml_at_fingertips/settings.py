@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'accounts',
     'classifier',
-    'regressor',
 ]
 
 # Custom user model

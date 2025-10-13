@@ -22,9 +22,6 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', TemplateView.as_view(template_name='base.html'), name='home'),
-    path('base2/', TemplateView.as_view(template_name='base2.html'), name='base2'),
+    path('', include('classifier.urls')),  # Use classifier URLs as default
     path('accounts/', include('accounts.urls')),
-    path('classifier/', include('classifier.urls')),
-    path('regressor/', include('regressor.urls')),
 ]

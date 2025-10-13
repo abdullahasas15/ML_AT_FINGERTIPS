@@ -306,9 +306,13 @@
             <div class="problem-card" style="padding:1rem 1.25rem; display:flex; align-items:center; justify-content:space-between;">
                 <div style="display:flex;align-items:center;gap:1rem;">
                     <div style="width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;color:white;">
-                        <svg class="heart-icon" width="20" height="18" viewBox="0 0 20 18" fill="currentColor">
-                            <path d="M10 18l-1.41-1.27C3.08 12.88 0 9.62 0 5.5 0 2.42 2.42 0 5.5 0 7.24 0 8.91.81 10 2.09 11.09.81 12.76 0 14.5 0 17.58 0 20 2.42 20 5.5c0 4.12-3.08 7.38-8.59 11.23L10 18z"/>
-                        </svg>
+                        {% if "uber" in problem.title|lower or "destination" in problem.title|lower or "eta" in problem.title|lower %}
+                            <i class="fas fa-map-marker-alt" style="font-size:1.5rem;"></i>
+                        {% else %}
+                            <svg class="heart-icon" width="20" height="18" viewBox="0 0 20 18" fill="currentColor">
+                                <path d="M10 18l-1.41-1.27C3.08 12.88 0 9.62 0 5.5 0 2.42 2.42 0 5.5 0 7.24 0 8.91.81 10 2.09 11.09.81 12.76 0 14.5 0 17.58 0 20 2.42 20 5.5c0 4.12-3.08 7.38-8.59 11.23L10 18z"/>
+                            </svg>
+                        {% endif %}
                     </div>
                     <div>
                         <a href="{% url 'model_detail_view' problem.id %}" style="text-decoration:none;color:#333;font-size:1.05rem;font-weight:600;">{{ problem.title }}</a>
