@@ -150,20 +150,40 @@ def predict_view(request, problem_id):
         data = json.loads(request.body)
         features = data.get('features', {})
 
-        # Ensure NYC features to calculate distances
-        req_keys = ['pickup_longitude', 'pickup_latitude', 'dropoff_longitude', 'dropoff_latitude']
-        for k in req_keys:
-            if k not in features:
-                return JsonResponse({'error': f'Missing required input: {k}'}, status=400)
-        # Calculate haversine/manhattan if missing
-        features['haversine_km'] = haversine_km(
-            float(features['pickup_longitude']), float(features['pickup_latitude']),
-            float(features['dropoff_longitude']), float(features['dropoff_latitude'])
-        )
-        features['manhattan_km'] = manhattan_km(
-            float(features['pickup_longitude']), float(features['pickup_latitude']),
-            float(features['dropoff_longitude']), float(features['dropoff_latitude'])
-        )
+        model_type = problem.model_type.lower()
+        normalized_features = {}
+        for key, value in features.items():
+            try:
+                normalized_features[key] = float(value)
+            except (TypeError, ValueError):
+                normalized_features[key] = value
+        features = normalized_features
+
+        if model_type == 'regression':
+            req_keys = ['pickup_longitude', 'pickup_latitude', 'dropoff_longitude', 'dropoff_latitude']
+            missing_inputs = [k for k in req_keys if k not in features]
+            if missing_inputs:
+                return JsonResponse({'error': f"Missing required input: {missing_inputs[0]}"}, status=400)
+            try:
+                features['haversine_km'] = haversine_km(
+                    float(features['pickup_longitude']), float(features['pickup_latitude']),
+                    float(features['dropoff_longitude']), float(features['dropoff_latitude'])
+                )
+                features['manhattan_km'] = manhattan_km(
+                    float(features['pickup_longitude']), float(features['pickup_latitude']),
+                    float(features['dropoff_longitude']), float(features['dropoff_latitude'])
+                )
+            except (TypeError, ValueError) as e:
+                return JsonResponse({'error': f'Invalid coordinate values: {e}'}, status=400)
+            feature_order = [
+                'pickup_longitude', 'pickup_latitude', 'dropoff_longitude', 'dropoff_latitude',
+                'passenger_count', 'hour', 'dow', 'month', 'haversine_km', 'manhattan_km'
+            ]
+        else:
+            feature_order = list(problem.features_description.keys())
+            missing_inputs = [k for k in feature_order if k not in features]
+            if missing_inputs:
+                return JsonResponse({'error': f"Missing required input: {missing_inputs[0]}"}, status=400)
 
         model_path = os.path.join(settings.BASE_DIR, problem.model_file)
         model = None
@@ -204,23 +224,7 @@ def predict_view(request, problem_id):
                     scaler = joblib.load(scaler_path)
                 except:
                     pass
-        feature_order = [
-            'pickup_longitude', 'pickup_latitude', 'dropoff_longitude', 'dropoff_latitude',
-            'passenger_count', 'hour', 'dow', 'month', 'haversine_km', 'manhattan_km'
-        ]
-        # Always calculate haversine_km and manhattan_km
-        try:
-            features['haversine_km'] = haversine_km(
-                float(features['pickup_longitude']), float(features['pickup_latitude']),
-                float(features['dropoff_longitude']), float(features['dropoff_latitude'])
-            )
-            features['manhattan_km'] = manhattan_km(
-                float(features['pickup_longitude']), float(features['pickup_latitude']),
-                float(features['dropoff_longitude']), float(features['dropoff_latitude'])
-            )
-        except Exception as e:
-            print(f"[ERROR] Could not calculate distance features: {e}")
-        input_data = [features.get(feature, 0) for feature in feature_order]
+        input_data = [float(features.get(feature, 0)) for feature in feature_order]
         print(f"[DEBUG] Received features: {features}")
         print(f"[DEBUG] Input data for model: {input_data}")
         if problem.model_type.lower() == 'regression' and problem.selected_model.lower().startswith('deepeta'):

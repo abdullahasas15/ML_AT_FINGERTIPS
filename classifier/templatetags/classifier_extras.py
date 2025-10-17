@@ -22,3 +22,13 @@ def percentage(value, decimals=0):
         return '0%'
     format_string = "{:." + str(decimals) + "f}%"
     return format_string.format(numeric_value * 100)
+
+@register.filter
+def replace(value, args):
+    """Replace occurrences of a string with another string
+    Usage: {{ value|replace:"old,new" }}
+    """
+    if not args or ',' not in args:
+        return value
+    old, new = args.split(',', 1)
+    return str(value).replace(old, new)
