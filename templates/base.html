@@ -51,10 +51,13 @@
       <div class="container">
         <div class="row align-items-center min-vh-100">
           <div class="col-lg-6">
-            <h1 class="display-3 fw-bold mb-4">
-              ML Learning Hub – Explore, Train, and Learn Real-World Machine Learning Models
+            <h1 class="hero-title mb-4">
+              ML Learning Hub
             </h1>
-            <p class="lead mb-4">
+            <p class="hero-subtitle mb-3">
+              Explore, Train, and Learn Real-World Machine Learning Models
+            </p>
+            <p class="hero-description mb-5">
               An interactive space for new learners to explore and understand supervised learning algorithms through
               real-world applications like Uber ETA Prediction, Heart Disease Classification, Air Quality Analysis,
               and Water Quality Prediction.
@@ -64,24 +67,22 @@
                 <i class="fas fa-play me-2"></i>Explore Projects
               </a>
               <a href="#about" class="btn btn-outline-light btn-lg">
-                <i class="fas fa-info-circle me-2"></i>About
+                <i class="fas fa-info-circle me-2"></i>Learn More
               </a>
             </div>
           </div>
           <div class="col-lg-6 text-center">
             <div class="hero-visual">
-              <div class="hero-visual">
-                <div class="ai-brain">
-                  <i class="fas fa-brain"></i>
-                </div>
-                <div class="orbiting-elements">
-                  <div class="orbit-element weather"><i class="fas fa-cloud-sun"></i></div>
-                  <div class="orbit-element health"><i class="fas fa-heartbeat"></i></div>
-                  <div class="orbit-element finance"><i class="fas fa-chart-line"></i></div>
-                  <div class="orbit-element wine"><i class="fas fa-wine-glass-alt"></i></div>
-                  <div class="orbit-element location"><i class="fas fa-map-marker-alt"></i></div>
-                  <div class="orbit-element ml"><i class="fas fa-robot"></i></div>
-                </div>
+              <div class="ai-brain">
+                <i class="fas fa-brain"></i>
+              </div>
+              <div class="orbiting-elements">
+                <div class="orbit-element weather"><i class="fas fa-cloud-sun"></i></div>
+                <div class="orbit-element health"><i class="fas fa-heartbeat"></i></div>
+                <div class="orbit-element finance"><i class="fas fa-chart-line"></i></div>
+                <div class="orbit-element wine"><i class="fas fa-wine-glass-alt"></i></div>
+                <div class="orbit-element location"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="orbit-element ml"><i class="fas fa-robot"></i></div>
               </div>
             </div>
           </div>
@@ -89,105 +90,80 @@
       </div>
     </section>
 
-    <!-- Projects Section: available projects cards -->
+    <!-- Projects Section: Curiosity-driven questions -->
     <section id="projects" class="projects-section">
       <div class="container">
         <div class="text-center mb-5">
-          <h2 class="display-4 fw-bold mb-3">Available Projects</h2>
-          <p class="lead text-muted">Hands-on projects to explore, train, and evaluate ML models.</p>
+          <h2 class="section-title mb-3">Discover Machine Learning in Action</h2>
+          <p class="section-subtitle">Click on any question below to explore how ML solves real-world problems</p>
         </div>
 
         <div class="row g-4">
-          <div class="col-md-6 col-lg-3">
-            <div class="project-card p-4">
-              <div class="project-icon mb-3"><i class="fas fa-route"></i></div>
-              <h5 class="mb-2">Uber ETA Prediction</h5>
-              <p class="text-muted">Regression models that estimate trip arrival times using real trip data and features.</p>
-              <a href="{% url 'models2_view' %}" class="btn btn-outline-primary mt-3">Explore Model</a>
-            </div>
-          </div>
-
-          <div class="col-md-6 col-lg-3">
-            <div class="project-card p-4">
-              <div class="project-icon mb-3"><i class="fas fa-heartbeat"></i></div>
-              <h5 class="mb-2">Heart Disease Classification</h5>
-              <p class="text-muted">Classify heart disease risk from clinical features and see feature-level explanations.</p>
-              <a href="{% url 'models1_view' %}" class="btn btn-outline-primary mt-3">Explore Model</a>
-            </div>
-          </div>
-
-          <div class="col-md-6 col-lg-3">
-            <div class="project-card p-4">
-              <div class="project-icon mb-3"><i class="fas fa-cloud-sun"></i></div>
-              <h5 class="mb-2">Air Quality Analysis</h5>
-              <p class="text-muted">Analyze pollution metrics and predict air quality indices using time-series features.</p>
-              <a href="#" class="btn btn-outline-primary mt-3">Explore Model</a>
-            </div>
-          </div>
-
-          <div class="col-md-6 col-lg-3">
-            <div class="project-card p-4">
-              <div class="project-icon mb-3"><i class="fas fa-water"></i></div>
-              <h5 class="mb-2">Water Quality Prediction</h5>
-              <p class="text-muted">Predict water contamination and quality scores using environmental features.</p>
-              <a href="#" class="btn btn-outline-primary mt-3">Explore Model</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  <section id="demos" class="demos-section">
-      <div class="container">
-        <div class="text-center mb-5">
-          <h2 class="display-4 fw-bold mb-3">Interactive Demos</h2>
-          <p class="lead text-muted">Experience machine learning in action</p>
-        </div>
-
-        <div class="demo-container">
-          <div class="demo-card health-demo">
-            <div class="demo-content">
-              <h3><i class="fas fa-heartbeat me-2"></i>Heart Disease Risk Assessment</h3>
-              <p>Predict heart disease risk using advanced ML classification</p>
-              <div class="demo-controls">
-                <a href="{% url 'models1_view' %}" class="btn btn-primary w-100">Try Heart Disease Model</a>
+          <div class="col-md-6">
+            <div class="question-card">
+              <div class="question-icon">
+                <i class="fas fa-heartbeat"></i>
               </div>
+              <h3 class="question-title">Can we predict heart disease risk using ML?</h3>
+              <p class="question-description">
+                Discover how machine learning analyzes clinical features like cholesterol, blood pressure, 
+                and heart rate to assess cardiovascular risk with remarkable accuracy.
+              </p>
+              <a href="{% url 'models1_view' %}" class="question-btn">
+                <span>Explore Heart Disease Prediction</span>
+                <i class="fas fa-arrow-right ms-2"></i>
+              </a>
             </div>
           </div>
 
-          <div class="demo-card transport-demo">
-            <div class="demo-content">
-              <h3><i class="fas fa-route me-2"></i>Uber ETA Prediction</h3>
-              <p>Predict travel time using Deep ETA regression models</p>
-              <div class="demo-controls">
-                <a href="{% url 'models2_view' %}" class="btn btn-primary w-100">Try Uber ETA Model</a>
+          <div class="col-md-6">
+            <div class="question-card">
+              <div class="question-icon">
+                <i class="fas fa-route"></i>
               </div>
+              <h3 class="question-title">How does Uber predict your arrival time?</h3>
+              <p class="question-description">
+                Learn how deep learning models process traffic patterns, distance, and historical data 
+                to estimate your ETA with impressive precision.
+              </p>
+              <a href="{% url 'models2_view' %}" class="question-btn">
+                <span>Explore Uber ETA Prediction</span>
+                <i class="fas fa-arrow-right ms-2"></i>
+              </a>
             </div>
           </div>
 
-          <div class="demo-card weather-demo">
-            <div class="demo-content">
-              <h3><i class="fas fa-cloud-sun me-2"></i>Weather Predictor</h3>
-              <p>Predict weather conditions based on historical data</p>
-              <div class="demo-controls">
-                <input type="number" id="temperature" placeholder="Temperature (°C)" class="form-control mb-2">
-                <input type="number" id="humidity" placeholder="Humidity (%)" class="form-control mb-2">
-                <button onclick="predictWeather()" class="btn btn-primary">Predict</button>
+          <div class="col-md-6">
+            <div class="question-card">
+              <div class="question-icon">
+                <i class="fas fa-cloud-sun"></i>
               </div>
-              <div id="weather-result" class="demo-result"></div>
+              <h3 class="question-title">Can ML predict air quality in your city?</h3>
+              <p class="question-description">
+                See how time-series models analyze pollution metrics, weather patterns, and environmental 
+                factors to forecast air quality indices.
+              </p>
+              <a href="#" class="question-btn">
+                <span>Explore Air Quality Analysis</span>
+                <i class="fas fa-arrow-right ms-2"></i>
+              </a>
             </div>
           </div>
 
-          <div class="demo-card wine-demo">
-            <div class="demo-content">
-              <h3><i class="fas fa-wine-glass-alt me-2"></i>Wine Quality Assessor</h3>
-              <p>Estimate wine quality based on chemical properties</p>
-              <div class="demo-controls">
-                <input type="number" id="alcohol" placeholder="Alcohol Content" step="0.1" class="form-control mb-2">
-                <input type="number" id="acidity" placeholder="Acidity Level" step="0.01" class="form-control mb-2">
-                <button onclick="assessWine()" class="btn btn-primary">Assess Quality</button>
+          <div class="col-md-6">
+            <div class="question-card">
+              <div class="question-icon">
+                <i class="fas fa-water"></i>
               </div>
-              <div id="wine-result" class="demo-result"></div>
+              <h3 class="question-title">How do we detect water contamination with AI?</h3>
+              <p class="question-description">
+                Explore how ML models evaluate pH levels, turbidity, and chemical composition 
+                to predict water quality and identify contamination risks.
+              </p>
+              <a href="#" class="question-btn">
+                <span>Explore Water Quality Prediction</span>
+                <i class="fas fa-arrow-right ms-2"></i>
+              </a>
             </div>
           </div>
         </div>
@@ -198,23 +174,28 @@
       <div class="container">
         <div class="row align-items-center">
           <div class="col-lg-6">
-            <h2 class="display-4 fw-bold mb-4">About ML Everywhere</h2>
+            <h2 class="display-4 fw-bold mb-4">About ML Learning Hub</h2>
             <p class="lead mb-4">
               We're dedicated to making machine learning accessible and demonstrating its practical applications
-              in everyday life. Our platform showcases how AI can solve real-world problems across various domains.
+              in everyday life. Our platform showcases how AI can solve real-world problems through interactive,
+              hands-on learning experiences.
+            </p>
+            <p class="mb-4">
+              Each project is carefully designed to help you understand core ML concepts—from data preprocessing 
+              and feature engineering to model training and evaluation—using real datasets and industry-standard algorithms.
             </p>
             <div class="stats">
               <div class="stat">
-                <h3>10+</h3>
-                <p>Models Trained</p>
+                <h3>4+</h3>
+                <p>ML Projects</p>
               </div>
               <div class="stat">
                 <h3>95%</h3>
-                <p>Accuracy Rate</p>
+                <p>Avg Accuracy</p>
               </div>
               <div class="stat">
-                <h3>24/7</h3>
-                <p>AI Processing</p>
+                <h3>100%</h3>
+                <p>Interactive</p>
               </div>
             </div>
           </div>
@@ -233,16 +214,16 @@
       <div class="container">
         <div class="row">
           <div class="col-lg-4">
-            <h5>ML Everywhere</h5>
+            <h5>ML Learning Hub</h5>
             <p>Making artificial intelligence accessible and practical for everyday learning and experimentation.</p>
           </div>
           <div class="col-lg-4">
             <h5>Quick Links</h5>
             <ul class="footer-links">
               <li><a href="#home">Home</a></li>
-              <li><a href="#features">Features</a></li>
-              <li><a href="#demos">Demos</a></li>
+              <li><a href="#projects">Projects</a></li>
               <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
             </ul>
           </div>
           <div class="col-lg-4">
