@@ -400,6 +400,65 @@ body {
   box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
+/* --- Additions for ML Learning Hub Projects and small tweaks --- */
+.projects-section {
+  background: #f7f8fb;
+  padding: 6rem 0;
+}
+
+.project-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(24,24,50,0.06);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  height: 100%;
+}
+
+.project-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(24,24,50,0.12);
+}
+
+.project-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.35rem;
+  background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+}
+
+@media (max-width: 768px) {
+  .hero-section h1 { font-size: 1.6rem; }
+  .hero-section .lead { font-size: 1rem; }
+  .hero-visual { width: 260px; height: 260px; }
+  .ai-brain { font-size: 4.5rem; }
+}
+
+/* Explanation panel (feature importance) */
+.explanation-panel {
+  margin-top: 1.5rem;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+}
+
+.explanation-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.explanation-label { flex: 0 0 160px; color: #334155; font-weight: 600; }
+.explanation-bar { height: 12px; background: #e6eefc; border-radius: 8px; flex: 1; overflow: hidden; }
+.explanation-fill { height: 100%; background: linear-gradient(90deg,#667eea,#764ba2); }
+
+
 .modal .alert {
   border-radius: 12px;
 }

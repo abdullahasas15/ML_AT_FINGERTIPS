@@ -187,3 +187,70 @@ function simulateProcessing(callback, minDelay = 1000, maxDelay = 2000) {
     const delay = Math.random() * (maxDelay - minDelay) + minDelay;
     setTimeout(callback, delay);
 }
+
+/* Render a simple feature explanation panel given a mapping or array
+   Expected formats:
+   - { feature: importance, ... }
+   - [ { feature: 'age', importance: 0.34 }, ... ]
+*/
+function renderExplanation(containerId, explanation) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+
+    let items = [];
+    if (Array.isArray(explanation)) {
+        items = explanation.map(it => ({ feature: it.feature || it.name, importance: it.importance || it.value || 0 }));
+    } else if (typeof explanation === 'object') {
+        items = Object.keys(explanation).map(k => ({ feature: k, importance: explanation[k] }));
+    }
+
+    // Normalize importance values to 0-1
+    const maxVal = items.reduce((m, it) => Math.max(m, Math.abs(it.importance || 0)), 0) || 1;
+
+    items.sort((a, b) => Math.abs(b.importance) - Math.abs(a.importance));
+
+    const panel = document.createElement('div');
+    panel.className = 'explanation-panel';
+
+    items.forEach(it => {
+        const row = document.createElement('div');
+        row.className = 'explanation-row';
+
+        const label = document.createElement('div');
+        label.className = 'explanation-label';
+        label.textContent = it.feature;
+
+        const bar = document.createElement('div');
+        bar.className = 'explanation-bar';
+
+        const fill = document.createElement('div');
+        fill.className = 'explanation-fill';
+        const relative = Math.min(1, Math.abs(it.importance) / maxVal);
+        fill.style.width = Math.max(6, Math.round(relative * 100)) + '%';
+
+        bar.appendChild(fill);
+
+        const score = document.createElement('div');
+        score.style.width = '60px';
+        score.style.textAlign = 'right';
+        score.style.color = '#475569';
+        score.style.fontWeight = '600';
+        score.textContent = (it.importance >= 0 ? '+' : '-') + (Math.abs(it.importance) * 100).toFixed(0) + '%';
+
+        row.appendChild(label);
+        row.appendChild(bar);
+        row.appendChild(score);
+
+        panel.appendChild(row);
+    });
+
+    container.appendChild(panel);
+}
+
+// small helper: add subtle hover to project cards
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.project-card');
+    cards.forEach(c => c.addEventListener('mouseenter', () => c.classList.add('hover')));
+    cards.forEach(c => c.addEventListener('mouseleave', () => c.classList.remove('hover')));
+});

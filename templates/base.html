@@ -6,15 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <title>ML Everywhere - AI-Powered Solutions</title>
+    <title>ML Learning Hub – Explore, Train, and Learn</title>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
       <div class="container">
         <a class="navbar-brand fw-bold" href="/">
           <i class="fas fa-brain me-2"></i>
-          <span class="text-gradient">ML</span> EVERYWHERE
+          <span class="text-gradient">ML</span> Learning Hub
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
@@ -25,13 +28,13 @@
               <a class="nav-link" href="#home">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#features">Features</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#demos">Demos</a>
+              <a class="nav-link" href="#projects">Projects</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#about">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#contact">Contact</a>
             </li>
             <li class="nav-item">
               <a class="btn btn-outline-light ms-2" href="{% url 'login_page' %}">Log In</a>
@@ -49,18 +52,19 @@
         <div class="row align-items-center min-vh-100">
           <div class="col-lg-6">
             <h1 class="display-3 fw-bold mb-4">
-              Machine Learning <span class="text-gradient">Everywhere</span>
+              ML Learning Hub – Explore, Train, and Learn Real-World Machine Learning Models
             </h1>
             <p class="lead mb-4">
-              Discover how artificial intelligence transforms everyday experiences through predictive analytics,
-              intelligent decision-making, and cutting-edge technology.
+              An interactive space for new learners to explore and understand supervised learning algorithms through
+              real-world applications like Uber ETA Prediction, Heart Disease Classification, Air Quality Analysis,
+              and Water Quality Prediction.
             </p>
             <div class="hero-buttons">
-              <a href="#demos" class="btn btn-primary btn-lg me-3">
-                <i class="fas fa-play me-2"></i>Explore Demos
+              <a href="#projects" class="btn btn-primary btn-lg me-3">
+                <i class="fas fa-play me-2"></i>Explore Projects
               </a>
-              <a href="#features" class="btn btn-outline-light btn-lg">
-                <i class="fas fa-info-circle me-2"></i>Learn More
+              <a href="#about" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-info-circle me-2"></i>About
               </a>
             </div>
           </div>
@@ -85,78 +89,55 @@
       </div>
     </section>
 
-    <section id="features" class="features-section">
+    <!-- Projects Section: available projects cards -->
+    <section id="projects" class="projects-section">
       <div class="container">
         <div class="text-center mb-5">
-          <h2 class="display-4 fw-bold mb-3">Powerful ML Applications</h2>
-          <p class="lead text-muted">Explore how machine learning revolutionizes various industries</p>
+          <h2 class="display-4 fw-bold mb-3">Available Projects</h2>
+          <p class="lead text-muted">Hands-on projects to explore, train, and evaluate ML models.</p>
         </div>
 
         <div class="row g-4">
-          <div class="col-lg-6">
-            <div class="feature-card" data-aos="fade-up">
-              <div class="feature-icon weather">
-                <i class="fas fa-cloud-sun"></i>
-              </div>
-              <h3>Weather Prediction</h3>
-              <p>Advanced ML models analyze historical data and satellite imagery to provide accurate weather forecasts and climate insights.</p>
-              <ul class="feature-list">
-                <li><i class="fas fa-check"></i> Temperature trend analysis</li>
-                <li><i class="fas fa-check"></i> Storm prediction systems</li>
-                <li><i class="fas fa-check"></i> Climate change modeling</li>
-              </ul>
+          <div class="col-md-6 col-lg-3">
+            <div class="project-card p-4">
+              <div class="project-icon mb-3"><i class="fas fa-route"></i></div>
+              <h5 class="mb-2">Uber ETA Prediction</h5>
+              <p class="text-muted">Regression models that estimate trip arrival times using real trip data and features.</p>
+              <a href="{% url 'models2_view' %}" class="btn btn-outline-primary mt-3">Explore Model</a>
             </div>
           </div>
 
-          <div class="col-lg-6">
-            <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
-              <div class="feature-icon health">
-                <i class="fas fa-heartbeat"></i>
-              </div>
-              <h3>Health Diagnostics</h3>
-              <p>AI-powered medical imaging and diagnostic tools that enable early detection and personalized treatment plans.</p>
-              <ul class="feature-list">
-                <li><i class="fas fa-check"></i> Malaria detection</li>
-                <li><i class="fas fa-check"></i> Disease prediction</li>
-                <li><i class="fas fa-check"></i> Treatment optimization</li>
-              </ul>
+          <div class="col-md-6 col-lg-3">
+            <div class="project-card p-4">
+              <div class="project-icon mb-3"><i class="fas fa-heartbeat"></i></div>
+              <h5 class="mb-2">Heart Disease Classification</h5>
+              <p class="text-muted">Classify heart disease risk from clinical features and see feature-level explanations.</p>
+              <a href="{% url 'models1_view' %}" class="btn btn-outline-primary mt-3">Explore Model</a>
             </div>
           </div>
 
-          <div class="col-lg-6">
-            <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
-              <div class="feature-icon wine">
-                <i class="fas fa-wine-glass-alt"></i>
-              </div>
-              <h3>Wine Quality</h3>
-              <p>Machine learning algorithms that analyze chemical composition to predict wine quality and optimal aging periods.</p>
-              <ul class="feature-list">
-                <li><i class="fas fa-check"></i> Quality scoring</li>
-                <li><i class="fas fa-check"></i> Price prediction</li>
-                <li><i class="fas fa-check"></i> Composition analysis</li>
-              </ul>
+          <div class="col-md-6 col-lg-3">
+            <div class="project-card p-4">
+              <div class="project-icon mb-3"><i class="fas fa-cloud-sun"></i></div>
+              <h5 class="mb-2">Air Quality Analysis</h5>
+              <p class="text-muted">Analyze pollution metrics and predict air quality indices using time-series features.</p>
+              <a href="#" class="btn btn-outline-primary mt-3">Explore Model</a>
             </div>
           </div>
 
-          <div class="col-lg-6">
-            <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
-              <div class="feature-icon finance">
-                <i class="fas fa-chart-line"></i>
-              </div>
-              <h3>Financial Analytics</h3>
-              <p>Intelligent systems for market analysis, risk assessment, fraud detection, and investment optimization.</p>
-              <ul class="feature-list">
-                <li><i class="fas fa-check"></i> Stock prediction</li>
-                <li><i class="fas fa-check"></i> Fraud detection</li>
-                <li><i class="fas fa-check"></i> Portfolio management</li>
-              </ul>
+          <div class="col-md-6 col-lg-3">
+            <div class="project-card p-4">
+              <div class="project-icon mb-3"><i class="fas fa-water"></i></div>
+              <h5 class="mb-2">Water Quality Prediction</h5>
+              <p class="text-muted">Predict water contamination and quality scores using environmental features.</p>
+              <a href="#" class="btn btn-outline-primary mt-3">Explore Model</a>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="demos" class="demos-section">
+  <section id="demos" class="demos-section">
       <div class="container">
         <div class="text-center mb-5">
           <h2 class="display-4 fw-bold mb-3">Interactive Demos</h2>
@@ -213,7 +194,7 @@
       </div>
     </section>
 
-    <section id="about" class="about-section">
+  <section id="about" class="about-section">
       <div class="container">
         <div class="row align-items-center">
           <div class="col-lg-6">
@@ -253,7 +234,7 @@
         <div class="row">
           <div class="col-lg-4">
             <h5>ML Everywhere</h5>
-            <p>Making artificial intelligence accessible and practical for everyday use.</p>
+            <p>Making artificial intelligence accessible and practical for everyday learning and experimentation.</p>
           </div>
           <div class="col-lg-4">
             <h5>Quick Links</h5>
@@ -275,7 +256,7 @@
           </div>
         </div>
         <div class="footer-bottom">
-          <p>&copy; 2024 ML Everywhere. All rights reserved.</p>
+          <p>&copy; 2025 ML Learning Hub by Mohammad Abdullah. Learn. Train. Innovate.</p>
         </div>
       </div>
     </footer>
