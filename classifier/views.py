@@ -19,9 +19,8 @@ warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
 
 def landing_page(request):
     user = get_user(request)
-    if user.is_authenticated:
-        return redirect('home')
-    return render(request, 'base.html')
+    # Always show base.html, authenticated users see explore button
+    return render(request, 'base.html', {'user': user})
 
 def haversine_km(lon1, lat1, lon2, lat2):
     R = 6371.0

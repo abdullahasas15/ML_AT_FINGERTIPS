@@ -76,14 +76,14 @@
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
         
-        .logout-btn {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        .home-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
         
-        .logout-btn:hover {
+        .home-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
         
         /* Main Container */
@@ -674,14 +674,14 @@
             <i class="fas fa-brain"></i>
             ML at Fingertips
         </div>
-        <div class="nav-actions">
+                <div class="nav-actions">
             <a href="{% url 'models1_view' %}" class="nav-btn back-btn">
                 <i class="fas fa-arrow-left"></i>
                 Back to Problem Statements
             </a>
-            <a href="/accounts/logout/" class="nav-btn logout-btn">
-                <i class="fas fa-sign-out-alt"></i>
-                Logout
+            <a href="/" class="nav-btn home-btn">
+                <i class="fas fa-home"></i>
+                Home
             </a>
         </div>
     </nav>

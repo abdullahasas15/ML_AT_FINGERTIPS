@@ -60,14 +60,14 @@
             cursor: pointer;
         }
         
-        .logout-btn {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        .home-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
         
-        .logout-btn:hover {
+        .home-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
         
         .container {
@@ -256,15 +256,6 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-        .logout-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-        }
-        .logout-btn:hover {
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
-        }
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -284,9 +275,9 @@
             ML at Fingertips
         </div>
         <div class="nav-actions">
-            <a href="/accounts/logout/" class="nav-btn logout-btn">
-                <i class="fas fa-sign-out-alt"></i>
-                Logout
+            <a href="/" class="nav-btn home-btn">
+                <i class="fas fa-home"></i>
+                Home
             </a>
         </div>
     </nav>
@@ -308,6 +299,8 @@
                     <div style="width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;color:white;">
                         {% if "uber" in problem.title|lower or "destination" in problem.title|lower or "eta" in problem.title|lower %}
                             <i class="fas fa-map-marker-alt" style="font-size:1.5rem;"></i>
+                        {% elif "car" in problem.title|lower or "price" in problem.title|lower %}
+                            <i class="fas fa-car" style="font-size:1.5rem;"></i>
                         {% else %}
                             <svg class="heart-icon" width="20" height="18" viewBox="0 0 20 18" fill="currentColor">
                                 <path d="M10 18l-1.41-1.27C3.08 12.88 0 9.62 0 5.5 0 2.42 2.42 0 5.5 0 7.24 0 8.91.81 10 2.09 11.09.81 12.76 0 14.5 0 17.58 0 20 2.42 20 5.5c0 4.12-3.08 7.38-8.59 11.23L10 18z"/>
