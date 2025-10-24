@@ -159,7 +159,16 @@ def predict_view(request, problem_id):
                 normalized_features[key] = value
         features = normalized_features
 
-        if model_type == 'regression':
+        # Check if this is a car price prediction model
+        is_car_price_model = 'car' in problem.title.lower() and 'price' in problem.title.lower()
+        
+        if is_car_price_model:
+            # Car price model - handle separately with categorical encoding
+            feature_order = ['name', 'age', 'km_driven', 'fuel', 'seller_type', 'transmission', 'owner']
+            missing_inputs = [k for k in feature_order if k not in features]
+            if missing_inputs:
+                return JsonResponse({'error': f"Missing required input: {missing_inputs[0]}"}, status=400)
+        elif model_type == 'regression':
             req_keys = ['pickup_longitude', 'pickup_latitude', 'dropoff_longitude', 'dropoff_latitude']
             missing_inputs = [k for k in req_keys if k not in features]
             if missing_inputs:
@@ -224,6 +233,18 @@ def predict_view(request, problem_id):
                     scaler = joblib.load(scaler_path)
                 except:
                     pass
+        
+        # Route to appropriate prediction function
+        if is_car_price_model:
+            # Use car price prediction function with categorical encoding
+            prediction_value, feature_importance, recommendations = predict_car_price(model, scaler, features, problem)
+            
+            return JsonResponse({
+                'prediction': prediction_value,
+                'feature_importance': feature_importance,
+                'recommendations': recommendations
+            }, status=200)
+        
         input_data = [float(features.get(feature, 0)) for feature in feature_order]
         print(f"[DEBUG] Received features: {features}")
         print(f"[DEBUG] Input data for model: {input_data}")
@@ -280,6 +301,264 @@ def predict_view(request, problem_id):
         }, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+def predict_car_price(model, scaler, features, problem):
+    """
+    Predict car price with categorical encoding
+    """
+    import os
+    from sklearn.preprocessing import LabelEncoder
+    
+    # Define feature order (must match training order)
+    feature_order = ['name', 'age', 'km_driven', 'fuel', 'seller_type', 'transmission', 'owner']
+    
+    # Load or create encoders
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    encoder_path = os.path.join(base_dir, 'classifier', 'models1', 'encoders.pkl')
+    
+    # Define encoding mappings (based on common car dataset values)
+    encoding_mappings = {
+        'fuel': {'Petrol': 0, 'Diesel': 1, 'CNG': 2, 'LPG': 3, 'Electric': 4},
+        'seller_type': {'Individual': 0, 'Dealer': 1, 'Trustmark Dealer': 2},
+        'transmission': {'Manual': 0, 'Automatic': 1},
+        'owner': {'First Owner': 0, 'Second Owner': 1, 'Third Owner': 2, 'Fourth & Above Owner': 3, 'Test Drive Car': 4}
+    }
+    
+    # If the loaded model is a sklearn Pipeline (with its own preprocessing),
+    # pass raw features in a DataFrame so the pipeline can handle encoding.
+    try:
+        from sklearn.pipeline import Pipeline
+    except Exception:
+        Pipeline = None
+
+    if Pipeline is not None and isinstance(model, Pipeline):
+        import pandas as pd, re, ast
+        row = {key: features.get(key) for key in feature_order}
+        df = pd.DataFrame([row], columns=feature_order)
+        # Proactively compute simple engineered columns commonly used during training
+        try:
+            if 'age' in df.columns and 'age_sq' not in df.columns:
+                df['age_sq'] = pd.to_numeric(df['age'], errors='coerce').fillna(0).astype(float) ** 2
+            if 'km_driven' in df.columns and 'km_driven_sq' not in df.columns:
+                df['km_driven_sq'] = pd.to_numeric(df['km_driven'], errors='coerce').fillna(0).astype(float) ** 2
+        except Exception:
+            pass
+        # Try direct predict; if pipeline complains about missing engineered columns,
+        # derive simple ones (like *_sq) on-the-fly and retry once.
+        try:
+            prediction = model.predict(df)[0]
+        except Exception as e:
+            msg = str(e)
+            missing_cols = set()
+            m = re.search(r"\{[^}]*\}", msg)
+            if 'columns are missing' in msg and m:
+                try:
+                    missing_cols = set(ast.literal_eval(m.group(0)))
+                except Exception:
+                    missing_cols = set()
+            # Compute simple derived columns if requested
+            for col in list(missing_cols):
+                if col.endswith('_sq'):
+                    base = col[:-3]
+                    if base in df.columns:
+                        try:
+                            df[col] = pd.to_numeric(df[base], errors='coerce').fillna(0).astype(float) ** 2
+                        except Exception:
+                            df[col] = 0.0
+                    else:
+                        df[col] = 0.0
+                elif col == 'age_sq' and 'age' in df.columns:
+                    df['age_sq'] = pd.to_numeric(df['age'], errors='coerce').fillna(0).astype(float) ** 2
+                elif col == 'km_driven_sq' and 'km_driven' in df.columns:
+                    df['km_driven_sq'] = pd.to_numeric(df['km_driven'], errors='coerce').fillna(0).astype(float) ** 2
+            # Retry once after adding engineered columns
+            prediction = model.predict(df)[0]
+        prediction_value = int(round(float(prediction)))
+
+        # Default feature importance (pipeline may not expose it)
+        default_weights = {
+            'name': 0.30,
+            'age': 0.25,
+            'km_driven': 0.20,
+            'fuel': 0.10,
+            'seller_type': 0.05,
+            'transmission': 0.05,
+            'owner': 0.05
+        }
+        feature_importance = {
+            k: {
+                'importance': v,
+                'value': features.get(k)
+            } for k, v in default_weights.items()
+        }
+        recommendations = generate_car_price_recommendations(prediction_value, features)
+        return prediction_value, feature_importance, recommendations
+
+    # Prepare input data in correct order for plain estimators
+    input_data = []
+    
+    for feature in feature_order:
+        value = features.get(feature)
+        
+        if feature == 'name':
+            # For car name, use a simple encoding based on first letter (or load encoder)
+            # You can improve this by loading a proper LabelEncoder trained on car names
+            try:
+                if os.path.exists(encoder_path):
+                    encoders = joblib.load(encoder_path)
+                    if 'name' in encoders:
+                        encoded_value = encoders['name'].transform([value])[0]
+                    else:
+                        # Fallback: simple encoding
+                        encoded_value = hash(value) % 100
+                else:
+                    # Fallback: simple encoding
+                    encoded_value = hash(value) % 100
+            except:
+                encoded_value = hash(value) % 100
+            input_data.append(encoded_value)
+        
+        elif feature in ['age', 'km_driven']:
+            # Numeric features
+            input_data.append(float(value))
+        
+        elif feature in encoding_mappings:
+            # Categorical features with defined mappings
+            encoded_value = encoding_mappings[feature].get(value, 0)
+            input_data.append(encoded_value)
+        
+        else:
+            # Unknown feature type, try to convert to float
+            try:
+                input_data.append(float(value))
+            except:
+                input_data.append(0)
+    
+    # Scale features if scaler is available
+    if scaler:
+        input_scaled = scaler.transform([input_data])
+    else:
+        input_scaled = np.array([input_data])
+    
+    # Make prediction
+    prediction = model.predict(input_scaled)[0]
+    prediction_value = int(prediction)
+    
+    # Load feature importance if available
+    feature_importance_path = os.path.join(base_dir, 'classifier', 'models1', 'feature_importance.pkl')
+    try:
+        if os.path.exists(feature_importance_path):
+            feature_importance_data = joblib.load(feature_importance_path)
+            feature_importance = dict(zip(feature_order, feature_importance_data))
+        else:
+            # Default feature importance
+            default_weights = {
+                'name': 0.30,
+                'age': 0.25,
+                'km_driven': 0.20,
+                'fuel': 0.10,
+                'seller_type': 0.05,
+                'transmission': 0.05,
+                'owner': 0.05
+            }
+            feature_importance = {
+                k: {
+                    'importance': v,
+                    'value': features.get(k)
+                } for k, v in default_weights.items()
+            }
+    except:
+        # Default feature importance
+        feature_importance = {
+            'name': 0.30,
+            'age': 0.25,
+            'km_driven': 0.20,
+            'fuel': 0.10,
+            'seller_type': 0.05,
+            'transmission': 0.05,
+            'owner': 0.05
+        }
+    
+    # Generate recommendations
+    recommendations = generate_car_price_recommendations(prediction_value, features)
+    
+    return prediction_value, feature_importance, recommendations
+
+
+def generate_car_price_recommendations(predicted_price, features):
+    """
+    Generate recommendations for car price prediction
+    """
+    recommendations = []
+    
+    age = float(features.get('age', 0))
+    km_driven = float(features.get('km_driven', 0))
+    fuel = features.get('fuel', '')
+    seller_type = features.get('seller_type', '')
+    transmission = features.get('transmission', '')
+    owner = features.get('owner', '')
+    car_name = features.get('name', '')
+    
+    recommendations.append(f"💰 **Predicted Price: ₹{predicted_price:,}**")
+    recommendations.append("\n**Price Analysis:**")
+    
+    # Age-based recommendations
+    if age <= 3:
+        recommendations.append("• ✅ **Recent Model**: Low age contributes positively to price")
+    elif age <= 7:
+        recommendations.append("• ⏰ **Moderate Age**: Car is in mid-life, fair pricing expected")
+    else:
+        recommendations.append("• ⚠️ **Older Model**: Higher age reduces resale value significantly")
+    
+    # Mileage-based recommendations
+    if km_driven <= 30000:
+        recommendations.append("• ✅ **Low Mileage**: Minimal usage increases car value")
+    elif km_driven <= 80000:
+        recommendations.append("• ⏰ **Average Mileage**: Standard usage for the age")
+    else:
+        recommendations.append("• ⚠️ **High Mileage**: Extensive use may affect price and reliability")
+    
+    # Fuel type recommendations
+    if fuel == 'Diesel':
+        recommendations.append("• 🔋 **Diesel Engine**: Good for long-distance, better resale in commercial market")
+    elif fuel == 'Petrol':
+        recommendations.append("• ⛽ **Petrol Engine**: Preferred for city driving, lower maintenance")
+    elif fuel == 'CNG':
+        recommendations.append("• 🌿 **CNG**: Economical fuel option, lower running costs")
+    
+    # Seller type recommendations
+    if seller_type == 'Individual':
+        recommendations.append("• 👤 **Individual Seller**: Negotiate price, verify documents carefully")
+    elif seller_type == 'Dealer':
+        recommendations.append("• 🏪 **Dealer**: More reliable, may offer warranty and exchange options")
+    
+    # Transmission recommendations
+    if transmission == 'Automatic':
+        recommendations.append("• 🚗 **Automatic**: Easier to drive, commands premium price")
+    else:
+        recommendations.append("• ⚙️ **Manual**: Lower maintenance cost, better fuel efficiency")
+    
+    # Owner recommendations
+    if owner == 'First Owner':
+        recommendations.append("• 👑 **First Owner**: Best condition expected, highest resale value")
+    elif owner == 'Second Owner':
+        recommendations.append("• 👥 **Second Owner**: Good condition likely, reasonable pricing")
+    else:
+        recommendations.append("• 🔄 **Multiple Owners**: Check service history and condition thoroughly")
+    
+    recommendations.append("\n**Buying Tips:**")
+    recommendations.append("• 🔍 Verify all documents (RC, insurance, service records)")
+    recommendations.append("• 🔧 Get a professional inspection done before purchase")
+    recommendations.append("• 💵 Compare with similar listings in your area")
+    recommendations.append("• 📊 Consider total cost of ownership (insurance, maintenance)")
+    
+    # Price range recommendation
+    price_range_lower = int(predicted_price * 0.9)
+    price_range_upper = int(predicted_price * 1.1)
+    recommendations.append(f"\n**Fair Price Range: ₹{price_range_lower:,} - ₹{price_range_upper:,}**")
+    
+    return "\n".join(recommendations)
+
 
 def get_perplexity_recommendations(prediction, features, problem_title, model_type):
     def get_fallback_recommendations(prediction, features, model_type):

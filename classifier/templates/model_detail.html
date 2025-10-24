@@ -743,49 +743,63 @@
             </div>
 
             <!-- Hidden form: revealed after clicking Try Model -->
+                        <!-- Hidden form: revealed after clicking Try Model -->
             <form id="predictionForm" style="display:none;">
                 <div class="form-grid" id="featuresGrid">
-                    <!-- Always include required DeepETA_DNN features -->
+                    {% for feature, description in problem.features_description.items %}
                     <div class="form-group">
-                        <label for="pickup_longitude">Pickup Longitude</label>
-                        <input type="number" id="pickup_longitude" name="pickup_longitude" step="any" required title="Longitude of pickup location">
-                        <div class="feature-desc">Longitude of pickup location</div>
+                        <label for="{{ feature }}">
+                            {{ feature|title }}
+                        </label>
+                        {% if feature == 'name' and problem.title|lower|slice:':3' == 'can' and 'car' in problem.title|lower %}
+                            <input type="text" id="{{ feature }}" name="{{ feature }}" required title="{{ description }}" list="car-names-list" autocomplete="off" placeholder="Start typing car name...">
+                            <datalist id="car-names-list">
+                                {% if problem.model_info %}
+                                    {% with model_info=problem.model_info|parse_json %}
+                                        {% if model_info.car_names %}
+                                            {% for car_name in model_info.car_names %}
+                                            <option value="{{ car_name }}">
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endif %}
+                            </datalist>
+                        {% elif feature == 'fuel' %}
+                            <select id="{{ feature }}" name="{{ feature }}" required title="{{ description }}">
+                                <option value="">Select...</option>
+                                <option value="Petrol">Petrol</option>
+                                <option value="Diesel">Diesel</option>
+                                <option value="CNG">CNG</option>
+                                <option value="LPG">LPG</option>
+                            </select>
+                        {% elif feature == 'seller_type' %}
+                            <select id="{{ feature }}" name="{{ feature }}" required title="{{ description }}">
+                                <option value="">Select...</option>
+                                <option value="Individual">Individual</option>
+                                <option value="Dealer">Dealer</option>
+                                <option value="Trustmark Dealer">Trustmark Dealer</option>
+                            </select>
+                        {% elif feature == 'transmission' %}
+                            <select id="{{ feature }}" name="{{ feature }}" required title="{{ description }}">
+                                <option value="">Select...</option>
+                                <option value="Manual">Manual</option>
+                                <option value="Automatic">Automatic</option>
+                            </select>
+                        {% elif feature == 'owner' %}
+                            <select id="{{ feature }}" name="{{ feature }}" required title="{{ description }}">
+                                <option value="">Select...</option>
+                                <option value="First Owner">First Owner</option>
+                                <option value="Second Owner">Second Owner</option>
+                                <option value="Third Owner">Third Owner</option>
+                                <option value="Fourth & Above Owner">Fourth & Above Owner</option>
+                                <option value="Test Drive Car">Test Drive Car</option>
+                            </select>
+                        {% else %}
+                            <input type="number" id="{{ feature }}" name="{{ feature }}" step="any" required title="{{ description }}">
+                        {% endif %}
+                        <div class="feature-desc">{{ description }}</div>
                     </div>
-                    <div class="form-group">
-                        <label for="pickup_latitude">Pickup Latitude</label>
-                        <input type="number" id="pickup_latitude" name="pickup_latitude" step="any" required title="Latitude of pickup location">
-                        <div class="feature-desc">Latitude of pickup location</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="dropoff_longitude">Dropoff Longitude</label>
-                        <input type="number" id="dropoff_longitude" name="dropoff_longitude" step="any" required title="Longitude of dropoff location">
-                        <div class="feature-desc">Longitude of dropoff location</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="dropoff_latitude">Dropoff Latitude</label>
-                        <input type="number" id="dropoff_latitude" name="dropoff_latitude" step="any" required title="Latitude of dropoff location">
-                        <div class="feature-desc">Latitude of dropoff location</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="passenger_count">Passenger Count</label>
-                        <input type="number" id="passenger_count" name="passenger_count" step="any" required title="Number of passengers">
-                        <div class="feature-desc">Number of passengers</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="hour">Hour</label>
-                        <input type="number" id="hour" name="hour" step="any" required title="Hour of pickup">
-                        <div class="feature-desc">Hour of pickup</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="dow">Day of Week</label>
-                        <input type="number" id="dow" name="dow" step="any" required title="Day of week (0=Monday)">
-                        <div class="feature-desc">Day of week (0=Monday)</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="month">Month</label>
-                        <input type="number" id="month" name="month" step="any" required title="Month (1-12)">
-                        <div class="feature-desc">Month (1-12)</div>
-                    </div>
+                    {% endfor %}
                 </div>
                 <button type="submit" class="predict-btn" id="predictBtn">
                     <i class="fas fa-magic"></i>
@@ -929,41 +943,90 @@
             const recommendationsText = document.getElementById('recommendationsText');
             const featureFactors = document.getElementById('featureFactors');
             
-            if (data.prediction === 1) {
-                predictionResult.className = 'prediction-result high-risk';
-                predictionResult.innerHTML = `
-                    <i class="fas fa-exclamation-triangle risk-icon"></i>
-                    <div>
-                        <div>High Risk Detected</div>
-                        <small>Please consult with a healthcare professional</small>
-                    </div>
-                `;
-            } else {
-                predictionResult.className = 'prediction-result low-risk';
-                predictionResult.innerHTML = `
-                    <i class="fas fa-check-circle risk-icon"></i>
-                    <div>
-                        <div>Low Risk</div>
-                        <small>Continue maintaining a healthy lifestyle</small>
-                    </div>
-                `;
-            }
+            // Check if this is a regression model (has 'predicted_value' or numeric prediction)
+            const isRegression = data.predicted_value !== undefined || typeof data.prediction === 'number' && data.prediction > 2;
             
-            if (data.prediction_proba) {
-                const confidence = Math.max(...data.prediction_proba) * 100;
-                const confidenceElement = document.createElement('div');
-                confidenceElement.style.marginTop = '0.5rem';
-                confidenceElement.style.fontSize = '0.9rem';
-                confidenceElement.style.opacity = '0.9';
-                confidenceElement.innerHTML = `<strong>Confidence: ${confidence.toFixed(1)}%</strong>`;
-                predictionResult.appendChild(confidenceElement);
+            if (isRegression) {
+                // Handle regression output (car price, Uber ETA, etc.)
+                const predictedValue = data.predicted_value || data.prediction;
+                const title = "{{ problem.title|lower }}";
+                
+                if (title.includes('price') || title.includes('car')) {
+                    // Car price prediction
+                    predictionResult.className = 'prediction-result low-risk';
+                    predictionResult.innerHTML = `
+                        <i class="fas fa-rupee-sign risk-icon"></i>
+                        <div>
+                            <div>Predicted Car Price</div>
+                            <h2 style="font-size:2.5rem;margin:0.5rem 0;">₹${Math.round(predictedValue).toLocaleString('en-IN')}</h2>
+                            <small>Estimated market value based on car features</small>
+                        </div>
+                    `;
+                } else if (title.includes('uber') || title.includes('eta')) {
+                    // Uber ETA prediction
+                    const minutes = Math.round(predictedValue);
+                    predictionResult.className = minutes < 20 ? 'prediction-result low-risk' : 'prediction-result high-risk';
+                    predictionResult.innerHTML = `
+                        <i class="fas fa-clock risk-icon"></i>
+                        <div>
+                            <div>Estimated Time of Arrival</div>
+                            <h2 style="font-size:2.5rem;margin:0.5rem 0;">${minutes} minutes</h2>
+                            <small>${minutes < 20 ? 'Quick trip expected' : 'Longer trip duration'}</small>
+                        </div>
+                    `;
+                } else {
+                    // Generic regression output
+                    predictionResult.className = 'prediction-result low-risk';
+                    predictionResult.innerHTML = `
+                        <i class="fas fa-chart-line risk-icon"></i>
+                        <div>
+                            <div>Prediction Result</div>
+                            <h2 style="font-size:2.5rem;margin:0.5rem 0;">${predictedValue.toFixed(2)}</h2>
+                        </div>
+                    `;
+                }
+            } else {
+                // Handle classification output (heart disease)
+                if (data.prediction === 1) {
+                    predictionResult.className = 'prediction-result high-risk';
+                    predictionResult.innerHTML = `
+                        <i class="fas fa-exclamation-triangle risk-icon"></i>
+                        <div>
+                            <div>High Risk Detected</div>
+                            <small>Please consult with a healthcare professional</small>
+                        </div>
+                    `;
+                } else {
+                    predictionResult.className = 'prediction-result low-risk';
+                    predictionResult.innerHTML = `
+                        <i class="fas fa-check-circle risk-icon"></i>
+                        <div>
+                            <div>Low Risk</div>
+                            <small>Continue maintaining a healthy lifestyle</small>
+                        </div>
+                    `;
+                }
+                
+                if (data.prediction_proba) {
+                    const confidence = Math.max(...data.prediction_proba) * 100;
+                    const confidenceElement = document.createElement('div');
+                    confidenceElement.style.marginTop = '0.5rem';
+                    confidenceElement.style.fontSize = '0.9rem';
+                    confidenceElement.style.opacity = '0.9';
+                    confidenceElement.innerHTML = `<strong>Confidence: ${confidence.toFixed(1)}%</strong>`;
+                    predictionResult.appendChild(confidenceElement);
+                }
             }
             
             // Display feature importance
-            displayFeatureImportance(data.feature_importance, featureFactors, data.prediction);
+            if (data.feature_importance) {
+                displayFeatureImportance(data.feature_importance, featureFactors, data.prediction);
+            }
             
             // Format recommendations with proper bullet points
-            formatRecommendations(data.recommendations, recommendationsText);
+            if (data.recommendations) {
+                formatRecommendations(data.recommendations, recommendationsText);
+            }
             document.getElementById('results').style.display = 'block';
         }
         

@@ -1,4 +1,5 @@
 from django import template
+import json
 
 register = template.Library()
 
@@ -32,3 +33,15 @@ def replace(value, args):
         return value
     old, new = args.split(',', 1)
     return str(value).replace(old, new)
+
+@register.filter
+def parse_json(value):
+    """Parse JSON string to Python object"""
+    if not value:
+        return {}
+    try:
+        if isinstance(value, str):
+            return json.loads(value)
+        return value
+    except (json.JSONDecodeError, TypeError):
+        return {}

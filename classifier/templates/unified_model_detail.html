@@ -753,7 +753,73 @@
             <!-- Hidden form: revealed after clicking Try Model -->
             <form id="predictionForm" style="display:none;">
                 <div class="form-grid" id="featuresGrid">
-                    {% if problem.model_type|lower == 'regression' %}
+                    {% if 'car' in problem.title|lower and 'price' in problem.title|lower %}
+                    <!-- Car Price Prediction Form -->
+                    {% for feature_key, feature_desc in problem.features_description.items %}
+                    <div class="form-group">
+                        {% if feature_key == 'name' %}
+                        <label for="{{ feature_key }}">{{ feature_key|title }}</label>
+                        <input type="text" id="{{ feature_key }}" name="{{ feature_key }}" 
+                               list="car_names_list" required title="{{ feature_desc }}"
+                               placeholder="Start typing car name...">
+                        <datalist id="car_names_list">
+                            {% if problem.model_info %}
+                                {% with car_info=problem.model_info|parse_json %}
+                                    {% for car_name in car_info.car_names %}
+                                        <option value="{{ car_name }}">
+                                    {% endfor %}
+                                {% endwith %}
+                            {% endif %}
+                        </datalist>
+                        <div class="feature-desc">{{ feature_desc }}</div>
+                        {% elif feature_key == 'fuel' %}
+                        <label for="{{ feature_key }}">{{ feature_key|title }}</label>
+                        <select id="{{ feature_key }}" name="{{ feature_key }}" required title="{{ feature_desc }}">
+                            <option value="">Select fuel type...</option>
+                            <option value="Petrol">Petrol</option>
+                            <option value="Diesel">Diesel</option>
+                            <option value="CNG">CNG</option>
+                            <option value="LPG">LPG</option>
+                            <option value="Electric">Electric</option>
+                        </select>
+                        <div class="feature-desc">{{ feature_desc }}</div>
+                        {% elif feature_key == 'seller_type' %}
+                        <label for="{{ feature_key }}">{{ feature_key|replace:"_, "|title }}</label>
+                        <select id="{{ feature_key }}" name="{{ feature_key }}" required title="{{ feature_desc }}">
+                            <option value="">Select seller type...</option>
+                            <option value="Individual">Individual</option>
+                            <option value="Dealer">Dealer</option>
+                            <option value="Trustmark Dealer">Trustmark Dealer</option>
+                        </select>
+                        <div class="feature-desc">{{ feature_desc }}</div>
+                        {% elif feature_key == 'transmission' %}
+                        <label for="{{ feature_key }}">{{ feature_key|title }}</label>
+                        <select id="{{ feature_key }}" name="{{ feature_key }}" required title="{{ feature_desc }}">
+                            <option value="">Select transmission...</option>
+                            <option value="Manual">Manual</option>
+                            <option value="Automatic">Automatic</option>
+                        </select>
+                        <div class="feature-desc">{{ feature_desc }}</div>
+                        {% elif feature_key == 'owner' %}
+                        <label for="{{ feature_key }}">{{ feature_key|title }}</label>
+                        <select id="{{ feature_key }}" name="{{ feature_key }}" required title="{{ feature_desc }}">
+                            <option value="">Select owner type...</option>
+                            <option value="First Owner">First Owner</option>
+                            <option value="Second Owner">Second Owner</option>
+                            <option value="Third Owner">Third Owner</option>
+                            <option value="Fourth & Above Owner">Fourth & Above Owner</option>
+                            <option value="Test Drive Car">Test Drive Car</option>
+                        </select>
+                        <div class="feature-desc">{{ feature_desc }}</div>
+                        {% else %}
+                        <label for="{{ feature_key }}">{{ feature_key|replace:"_, "|title }}</label>
+                        <input type="number" id="{{ feature_key }}" name="{{ feature_key }}" step="any" required title="{{ feature_desc }}">
+                        <div class="feature-desc">{{ feature_desc }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% elif problem.model_type|lower == 'regression' %}
+                    <!-- Uber ETA Prediction Form -->
                     <div class="form-group">
                         <label for="pickup_longitude">Pickup Longitude</label>
                         <input type="number" id="pickup_longitude" name="pickup_longitude" step="any" required title="Longitude of pickup location">
@@ -860,7 +926,13 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">Accuracy</div>
-                    <div class="info-value">{{ problem.accuracy_scores|get_item:problem.selected_model|percentage:1 }}</div>
+                    <div class="info-value">
+                        {% if problem.model_type|lower == 'regression' %}
+                            R² = {{ problem.accuracy_scores|get_item:problem.selected_model|floatformat:3 }}
+                        {% else %}
+                            {{ problem.accuracy_scores|get_item:problem.selected_model|percentage:1 }}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
             
@@ -870,11 +942,23 @@
             </button>
             
             <div class="accuracy-section" id="accuracySection">
-                <h3>Model Accuracy Comparison</h3>
+                <h3>
+                    {% if problem.model_type|lower == 'regression' %}
+                        Model R² Score Comparison
+                    {% else %}
+                        Model Accuracy Comparison
+                    {% endif %}
+                </h3>
                 <div class="accuracy-comparison">
                     {% for model_name, accuracy in problem.accuracy_scores.items %}
                     <div class="accuracy-item {% if model_name == problem.selected_model %}selected{% endif %}">
-                        <div class="accuracy-score">{{ accuracy|percentage:0 }}</div>
+                        <div class="accuracy-score">
+                            {% if problem.model_type|lower == 'regression' %}
+                                {{ accuracy|floatformat:3 }}
+                            {% else %}
+                                {{ accuracy|percentage:0 }}
+                            {% endif %}
+                        </div>
                         <div class="model-name">{{ model_name }}</div>
                     </div>
                     {% endfor %}
@@ -911,7 +995,8 @@
             const features = {};
 
             for (let [key, value] of formData.entries()) {
-                features[key] = parseFloat(value);
+                const num = parseFloat(value);
+                features[key] = isNaN(num) ? value : num;
             }
 
             // Show loading
@@ -949,8 +1034,27 @@
             const recommendationsText = document.getElementById('recommendationsText');
             const featureFactors = document.getElementById('featureFactors');
             
-            if (modelType === 'regression') {
-                // Handle regression results (ETA prediction)
+            // Check if this is a car price prediction
+            const isCarPrice = '{{ problem.title|lower }}'.includes('car') && '{{ problem.title|lower }}'.includes('price');
+            
+            if (modelType === 'regression' && isCarPrice) {
+                // Handle car price prediction
+                const price = Math.round(data.prediction);
+                const priceFormatted = '₹' + price.toLocaleString('en-IN');
+                
+                predictionResult.className = 'prediction-result fast-eta';
+                predictionResult.innerHTML = `
+                    <i class="fas fa-car prediction-icon"></i>
+                    <div>
+                        <div>Predicted Price: ${priceFormatted}</div>
+                        <small>Based on car features and market analysis</small>
+                    </div>
+                `;
+                
+                // Display feature importance for car price
+                displayRegressionFeatureImportance(data.feature_importance, featureFactors, price);
+            } else if (modelType === 'regression') {
+                // Handle ETA regression results
                 const etaMinutes = Math.round(data.prediction);
                 
                 if (etaMinutes <= 15) {
@@ -1027,7 +1131,7 @@
             document.getElementById('results').style.display = 'block';
         }
         
-        function displayRegressionFeatureImportance(featureImportance, container, etaMinutes) {
+    function displayRegressionFeatureImportance(featureImportance, container, etaMinutes) {
             // Feature descriptions for better user understanding
             const featureDescriptions = {
                 'distance': 'Distance is a primary factor in travel time calculation',
@@ -1043,8 +1147,20 @@
             
             let html = '';
             
-            // Show top 6 most important features
-            const topFeatures = featureImportance.slice(0, 6);
+            // Normalize featureImportance to array of [name, {importance, value}]
+            let featuresArray = [];
+            if (Array.isArray(featureImportance)) {
+                featuresArray = featureImportance;
+            } else if (featureImportance && typeof featureImportance === 'object') {
+                featuresArray = Object.entries(featureImportance).map(([k, v]) => {
+                    if (v && typeof v === 'object') return [k, v];
+                    return [k, { importance: Number(v) || 0, value: '' }];
+                });
+            }
+
+            // Sort by importance desc and take top 6
+            featuresArray.sort((a, b) => (b[1]?.importance || 0) - (a[1]?.importance || 0));
+            const topFeatures = featuresArray.slice(0, 6);
             
             topFeatures.forEach(([featureName, featureData]) => {
                 const importance = featureData.importance;
@@ -1077,7 +1193,7 @@
                 }
                 
                 // Calculate importance percentage for visual bar
-                const maxImportance = Math.max(...featureImportance.map(([, data]) => data.importance));
+                const maxImportance = Math.max(...featuresArray.map(([, data]) => data.importance || 0), 1);
                 const importancePercentage = (importance / maxImportance) * 100;
                 
                 html += `
@@ -1121,12 +1237,30 @@
             
             let html = '';
             
-            // Show top 6 most important features
-            const topFeatures = featureImportance.slice(0, 6);
+            // Normalize featureImportance to array of [name, {importance, value}]
+            let featuresArray = [];
+            if (Array.isArray(featureImportance)) {
+                featuresArray = featureImportance;
+            } else if (featureImportance && typeof featureImportance === 'object') {
+                featuresArray = Object.entries(featureImportance).map(([k, v]) => {
+                    if (v && typeof v === 'object') return [k, v];
+                    return [k, { importance: Number(v) || 0, value: '' }];
+                });
+            }
+
+            // Sort and take top 6
+            featuresArray.sort((a, b) => (b[1]?.importance || 0) - (a[1]?.importance || 0));
+            const topFeatures = featuresArray.slice(0, 6);
+            
+            // Ensure we have at least one feature to avoid division by zero
+            if (topFeatures.length === 0) {
+                container.innerHTML = '<p>No feature importance data available.</p>';
+                return;
+            }
             
             topFeatures.forEach(([featureName, featureData]) => {
-                const importance = featureData.importance;
-                const value = featureData.value;
+                const importance = featureData.importance || 0;
+                const value = featureData.value || 0;
                 const description = featureDescriptions[featureName] || `${featureName} is an important factor`;
                 
                 // Determine impact based on prediction and medical knowledge
@@ -1152,8 +1286,13 @@
                 }
                 
                 // Calculate importance percentage for visual bar
-                const maxImportance = Math.max(...featureImportance.map(([, data]) => data.importance));
+                // Backend returns importance values already scaled (e.g., 0.15 = 15%, 1.28 = 128%)
+                const maxImportance = Math.max(...featuresArray.map(([, data]) => data.importance || 0), 1);
                 const importancePercentage = (importance / maxImportance) * 100;
+                
+                // Format percentage: if importance is < 1, it's a decimal (0-1), multiply by 100
+                // If >= 1, it's already scaled as a percentage value
+                const displayPercentage = importance < 1 ? (importance * 100).toFixed(1) : importance.toFixed(1);
                 
                 html += `
                     <div class="factor-item ${impactClass === 'high-impact' ? 'high-impact' : 'low-impact'}">
@@ -1165,7 +1304,7 @@
                             <div class="importance-bar">
                                 <div class="importance-fill" style="width: ${importancePercentage}%"></div>
                             </div>
-                            <div class="importance-score">${(importance * 100).toFixed(1)}%</div>
+                            <div class="importance-score">${displayPercentage}%</div>
                         </div>
                         <div class="factor-description">${description}</div>
                         <div class="factor-impact ${impactClass === 'high-impact' ? 'positive' : 'negative'}">${impactText}</div>

@@ -26,8 +26,8 @@ def signup_page(request):
             first_name=first_name,
             last_name=last_name
         )
-    login(request, user)
-    return redirect('/')
+        login(request, user)
+        return redirect('/')
     return render(request, 'signup.html')
 
 def login_page(request):
