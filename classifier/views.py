@@ -238,10 +238,16 @@ def predict_view(request, problem_id):
             # Use car price prediction function with categorical encoding
             prediction_value, feature_importance, recommendations = predict_car_price(model, scaler, features, problem)
             
+            # Get AI-powered explanations for car price
+            prediction_explanation = get_prediction_explanation(prediction_value, features, problem.title, 'car_price')
+            feature_impact_explanation = get_feature_impact_explanation(feature_importance, prediction_value, features, problem.title, 'car_price')
+            
             return JsonResponse({
                 'prediction': prediction_value,
                 'feature_importance': feature_importance,
-                'recommendations': recommendations
+                'recommendations': recommendations,
+                'prediction_explanation': prediction_explanation,
+                'feature_impact_explanation': feature_impact_explanation
             }, status=200)
         
         input_data = [float(features.get(feature, 0)) for feature in feature_order]
@@ -292,11 +298,18 @@ def predict_view(request, problem_id):
         feature_names = list(problem.features_description.keys())
         feature_importance = calculate_feature_importance(model, scaler, input_data, feature_names, prediction, problem.model_type)
         recommendations = get_perplexity_recommendations(prediction, features, problem.title, problem.model_type)
+        
+        # Get AI-powered explanations
+        prediction_explanation = get_prediction_explanation(prediction, features, problem.title, problem.model_type)
+        feature_impact_explanation = get_feature_impact_explanation(feature_importance, prediction, features, problem.title, problem.model_type)
+        
         # Return prediction and advice
         return JsonResponse({
             'prediction': prediction_value,
             'feature_importance': feature_importance,
-            'recommendations': recommendations
+            'recommendations': recommendations,
+            'prediction_explanation': prediction_explanation,
+            'feature_impact_explanation': feature_impact_explanation
         }, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
@@ -557,6 +570,214 @@ def generate_car_price_recommendations(predicted_price, features):
     recommendations.append(f"\n**Fair Price Range: ₹{price_range_lower:,} - ₹{price_range_upper:,}**")
     
     return "\n".join(recommendations)
+
+
+def get_prediction_explanation(prediction, features, problem_title, model_type):
+    """
+    Get AI-powered explanation for WHY this prediction was made
+    """
+    try:
+        api_key = "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"
+        
+        if model_type.lower() == 'regression':
+            # Uber ETA prediction
+            eta_minutes = int(prediction)
+            distance = features.get('haversine_km', features.get('distance', 0))
+            hour = features.get('hour', features.get('pickup_hour', 0))
+            
+            prompt = f"""You are an AI explaining ML predictions to beginners. 
+
+**Prediction:** {eta_minutes} minutes travel time
+**Input:** {distance:.1f} km distance, {hour}:00 departure time
+
+Explain in 2-3 sentences WHY the model predicted this specific travel time. Focus on:
+1. How distance and time-of-day affect the prediction
+2. What patterns the model learned from historical data
+3. Why this makes sense for this specific trip
+
+Be conversational, educational, and beginner-friendly. No technical jargon."""
+
+        elif 'car' in problem_title.lower() and 'price' in problem_title.lower():
+            # Car price prediction
+            car_price = int(prediction)
+            car_name = features.get('name', 'Unknown')
+            age = features.get('age', 0)
+            km_driven = features.get('km_driven', 0)
+            
+            prompt = f"""You are an AI explaining ML predictions to beginners.
+
+**Prediction:** ₹{car_price:,}
+**Car:** {car_name}
+**Age:** {age} years, **Mileage:** {km_driven:,} km
+
+Explain in 2-3 sentences WHY the model predicted this specific price. Focus on:
+1. How car brand/model reputation affects pricing
+2. Impact of age and mileage on depreciation
+3. Why this valuation makes sense for this specific car
+
+Be conversational, educational, and beginner-friendly. No technical jargon."""
+
+        else:
+            # Heart disease prediction
+            risk = "HIGH RISK" if prediction == 1 else "LOW RISK"
+            age = features.get('age', 0)
+            cp = features.get('cp', 0)
+            chol = features.get('chol', 0)
+            trestbps = features.get('trestbps', 0)
+            
+            prompt = f"""You are an AI explaining ML predictions to beginners.
+
+**Prediction:** {risk} for heart disease
+**Patient:** Age {age}, Cholesterol {chol} mg/dl, BP {trestbps} mm Hg, Chest pain type {cp}
+
+Explain in 2-3 sentences WHY the model predicted this risk level. Focus on:
+1. Which health indicators most influenced this prediction
+2. How these values compare to healthy ranges
+3. What patterns the model learned from medical data
+
+Be conversational, educational, empathetic, and beginner-friendly. No technical jargon."""
+
+        headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        }
+        
+        data = {
+            'model': 'sonar-pro',
+            'messages': [{'role': 'user', 'content': prompt}],
+            'max_tokens': 200
+        }
+        
+        response = requests.post(
+            'https://api.perplexity.ai/chat/completions',
+            headers=headers,
+            json=data,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result['choices'][0]['message']['content']
+    except:
+        pass
+    
+    # Fallback explanations
+    if model_type.lower() == 'regression':
+        return f"This {int(prediction)}-minute prediction is based on the distance ({features.get('haversine_km', 0):.1f} km) and departure time (hour {features.get('hour', 0)}). The model learned from millions of trips that this combination typically results in this travel duration."
+    elif 'car' in problem_title.lower():
+        return f"The model predicted ₹{int(prediction):,} based on the car's brand reputation, {features.get('age', 0)} years of age, and {features.get('km_driven', 0):,} km mileage. These factors significantly impact resale value."
+    else:
+        risk = "high" if prediction == 1 else "low"
+        return f"The model predicted {risk} risk based on your health parameters, particularly age ({features.get('age', 0)}), cholesterol ({features.get('chol', 0)}), and blood pressure ({features.get('trestbps', 0)}). These indicators are key factors in cardiovascular health assessment."
+
+
+def get_feature_impact_explanation(feature_importance, prediction, features, problem_title, model_type):
+    """
+    Get AI-powered explanation for HOW each feature impacted the prediction
+    """
+    try:
+        api_key = "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"
+        
+        # Get top 3 features
+        if isinstance(feature_importance, list):
+            top_features = feature_importance[:3]
+        else:
+            top_features = sorted(feature_importance.items(), key=lambda x: x[1].get('importance', 0), reverse=True)[:3]
+        
+        # Format feature info
+        feature_info = []
+        for item in top_features:
+            if isinstance(item, tuple):
+                feat_name, feat_data = item
+                importance = feat_data.get('importance', 0)
+                value = feat_data.get('value', features.get(feat_name, 0))
+            else:
+                feat_name = item[0]
+                importance = item[1].get('importance', 0)
+                value = item[1].get('value', features.get(feat_name, 0))
+            
+            feature_info.append(f"{feat_name}={value} (importance: {importance:.2%})")
+        
+        feature_str = ", ".join(feature_info)
+        
+        if model_type.lower() == 'regression':
+            prompt = f"""You are an AI explaining ML model features to beginners.
+
+**Top Features Affecting Prediction:**
+{feature_str}
+
+Explain in 2-3 sentences HOW these specific features influenced the {int(prediction)}-minute travel time prediction:
+1. Why each feature's value pushed the prediction up or down
+2. What these features tell us about the trip conditions
+3. How they work together to determine travel time
+
+Be specific to the actual values provided. Be conversational and educational."""
+
+        elif 'car' in problem_title.lower():
+            prompt = f"""You are an AI explaining ML model features to beginners.
+
+**Top Features Affecting Price:**
+{feature_str}
+
+Explain in 2-3 sentences HOW these specific features influenced the ₹{int(prediction):,} price prediction:
+1. Why each feature's value increased or decreased the price
+2. What these values tell us about the car's condition/value
+3. How they combine to determine fair market price
+
+Be specific to the actual values provided. Be conversational and educational."""
+
+        else:
+            risk = "high risk" if prediction == 1 else "low risk"
+            prompt = f"""You are an AI explaining ML model features to beginners.
+
+**Top Features Affecting Diagnosis:**
+{feature_str}
+
+Explain in 2-3 sentences HOW these specific health indicators influenced the {risk} prediction:
+1. Why each indicator's value increased or decreased the risk
+2. What these values tell us about cardiovascular health
+3. How they combine to determine overall risk level
+
+Be specific to the actual values provided. Be empathetic, conversational and educational."""
+
+        headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        }
+        
+        data = {
+            'model': 'sonar-pro',
+            'messages': [{'role': 'user', 'content': prompt}],
+            'max_tokens': 200
+        }
+        
+        response = requests.post(
+            'https://api.perplexity.ai/chat/completions',
+            headers=headers,
+            json=data,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result['choices'][0]['message']['content']
+    except:
+        pass
+    
+    # Fallback explanations
+    if feature_importance and len(feature_importance) > 0:
+        if isinstance(feature_importance, list):
+            top_feat = feature_importance[0]
+            feat_name = top_feat[0]
+            feat_value = top_feat[1].get('value', 0)
+        else:
+            top_feat = sorted(feature_importance.items(), key=lambda x: x[1].get('importance', 0), reverse=True)[0]
+            feat_name = top_feat[0]
+            feat_value = top_feat[1].get('value', 0)
+        
+        return f"The most influential feature was '{feat_name}' with value {feat_value}. This feature, along with others, contributed significantly to the final prediction by capturing important patterns the model learned during training."
+    
+    return "The model considered all input features and their interactions to arrive at this prediction. Each feature contributed based on patterns learned from thousands of similar examples in the training data."
 
 
 def get_perplexity_recommendations(prediction, features, problem_title, model_type):

@@ -15,6 +15,13 @@ class ProblemStatement(models.Model):
     selected_model = models.CharField(max_length=100, help_text="The model currently being used")
     code_snippet = models.TextField(help_text="Python code for the model")
     model_info = models.TextField(help_text="Detailed information about the model", blank=True)
+    
+    # New fields for learning experience
+    problem_statement_detail = models.TextField(help_text="Detailed problem explanation for beginners", blank=True, null=True)
+    approach_explanation = models.TextField(help_text="Our approach and model selection reasoning", blank=True, null=True)
+    preprocessing_steps = models.TextField(help_text="Data preprocessing and feature engineering techniques", blank=True, null=True)
+    model_architecture = models.TextField(help_text="Model architecture, parameters, and hyperparameters", blank=True, null=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

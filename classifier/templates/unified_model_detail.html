@@ -173,6 +173,325 @@
             color: #333;
         }
         
+        /* Learning Tabs */
+        .learning-tabs {
+            width: 100%;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+        }
+        
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+        }
+        
+        .tab-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .tab-contents {
+            min-height: 400px;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .learning-content {
+            padding: 2rem;
+            line-height: 1.9;
+            color: #2c3e50;
+            font-size: 1.05rem;
+        }
+        
+        /* Enhanced Typography for Learning Content */
+        .learning-content h1 {
+            color: #1a1a1a;
+            margin: 2.5rem 0 1.5rem 0;
+            font-weight: 700;
+            font-size: 2.2rem;
+            position: relative;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid #667eea;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .learning-content h2 {
+            color: #2c3e50;
+            margin: 2rem 0 1.2rem 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
+            position: relative;
+        }
+        
+        .learning-content h2::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .learning-content h3 {
+            color: #34495e;
+            margin: 1.75rem 0 1rem;
+            font-weight: 600;
+            font-size: 1.5rem;
+            padding-left: 1.25rem;
+            border-left: 5px solid #667eea;
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, transparent 100%);
+            padding: 0.85rem 1.25rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .learning-content h3:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.12) 0%, transparent 100%);
+            transform: translateX(5px);
+        }
+        
+        .learning-content h4 {
+            color: #2c3e50;
+            margin: 1.5rem 0 0.75rem;
+            font-weight: 600;
+            font-size: 1.25rem;
+            padding-left: 0.75rem;
+            border-left: 3px solid #667eea;
+        }
+        
+        /* Enhanced Paragraphs */
+        .learning-content p {
+            margin: 1.2rem 0;
+            line-height: 1.9;
+            text-align: justify;
+            color: #2c3e50;
+        }
+        
+        /* Enhanced Lists */
+        .learning-content ul,
+        .learning-content ol {
+            margin: 1.5rem 0;
+            padding-left: 2.5rem;
+            color: #2c3e50;
+        }
+        
+        .learning-content ul li {
+            margin: 0.85rem 0;
+            position: relative;
+            padding-left: 0.75rem;
+            line-height: 1.8;
+            color: #34495e;
+        }
+        
+        .learning-content ul li::marker {
+            color: #667eea;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .learning-content ol li {
+            margin: 0.85rem 0;
+            padding-left: 0.5rem;
+            line-height: 1.8;
+            color: #34495e;
+        }
+        
+        .learning-content ol li::marker {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+        
+        /* Highlighted Text Elements */
+        .learning-content strong {
+            color: #1a1a1a;
+            font-weight: 700;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            padding: 0.25rem 0.6rem;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .learning-content em {
+            color: #2c3e50;
+            font-style: italic;
+            font-weight: 500;
+        }
+        
+        /* Inline Code */
+        .learning-content code {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            padding: 0.35rem 0.65rem;
+            border-radius: 6px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            color: #c7254e;
+            font-size: 0.92em;
+            font-weight: 600;
+            border: 1px solid #ddd;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        /* Code Blocks */
+        .learning-content pre {
+            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+            color: #f8f8f2;
+            padding: 1.75rem;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 1.75rem 0;
+            border: 1px solid #444;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.25);
+            position: relative;
+        }
+        
+        .learning-content pre::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: #1a1a1a;
+            border-radius: 12px 12px 0 0;
+            border-bottom: 1px solid #444;
+        }
+        
+        .learning-content pre code {
+            background: transparent;
+            color: #f8f8f2;
+            padding: 0;
+            border: none;
+            box-shadow: none;
+            font-weight: normal;
+        }
+        
+        /* Tables */
+        .learning-content table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1.75rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .learning-content table th,
+        .learning-content table td {
+            padding: 1.1rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .learning-content table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.8px;
+        }
+        
+        .learning-content table tr:nth-child(even) {
+            background: linear-gradient(90deg, #f8f9ff 0%, #fafbff 100%);
+        }
+        
+        .learning-content table tr:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.08) 100%);
+            transition: background 0.2s ease;
+        }
+        
+        /* Blockquotes */
+        .learning-content blockquote {
+            border-left: 6px solid #667eea;
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, transparent 100%);
+            padding: 1.5rem 1.75rem;
+            margin: 1.75rem 0;
+            border-radius: 8px;
+            font-style: italic;
+            color: #2c3e50;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+        }
+        
+        /* Special Highlight */
+        .learning-content mark {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+            padding: 0.25rem 0.6rem;
+            border-radius: 5px;
+            font-weight: 600;
+            color: #1a1a1a;
+            box-shadow: 0 1px 3px rgba(255, 193, 7, 0.2);
+        }
+        
+        /* Table Data Text Color */
+        .learning-content table td {
+            color: #2c3e50;
+        }
+        
+        .code-download-section {
+            margin-top: 2rem;
+        }
+        
+        .code-download-section pre {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
         /* Dataset Sample */
         .dataset-sample {
             background: #f8f9ff;
@@ -347,6 +666,68 @@
         
         .prediction-icon {
             font-size: 2rem;
+        }
+        
+        /* AI Explanation Boxes */
+        .ai-explanation {
+            margin-top: 2rem;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .ai-explanation h4 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .explanation-box {
+            background: linear-gradient(135deg, #f8f9ff 0%, #fff5f8 100%);
+            border-left: 4px solid #667eea;
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: start;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+        
+        .explanation-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .explanation-content {
+            flex: 1;
+            line-height: 1.8;
+            color: #333;
+            font-size: 1rem;
+        }
+        
+        .explanation-content strong {
+            color: #667eea;
         }
         
         /* Feature Explanation */
@@ -700,6 +1081,95 @@
             <p class="description">{{ problem.description }}</p>
         </div>
         
+        <!-- Learning Journey Tabs -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="learning-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="problem">
+                        <i class="fas fa-question-circle"></i>
+                        Problem Statement
+                    </button>
+                    <button class="tab-btn" data-tab="approach">
+                        <i class="fas fa-lightbulb"></i>
+                        Our Approach
+                    </button>
+                    <button class="tab-btn" data-tab="preprocessing">
+                        <i class="fas fa-cogs"></i>
+                        Data Preprocessing
+                    </button>
+                    <button class="tab-btn" data-tab="architecture">
+                        <i class="fas fa-project-diagram"></i>
+                        Model Architecture
+                    </button>
+                    <button class="tab-btn" data-tab="try">
+                        <i class="fas fa-play-circle"></i>
+                        Try Model
+                    </button>
+                    <button class="tab-btn" data-tab="code">
+                        <i class="fas fa-code"></i>
+                        Download Code
+                    </button>
+                </div>
+                
+                <div class="tab-contents">
+                    <!-- Problem Statement Tab -->
+                    <div class="tab-content active" id="problem-tab">
+                        <div class="learning-content">
+                            {{ problem.problem_statement_detail|markdown_to_html }}
+                        </div>
+                    </div>
+                    
+                    <!-- Approach Tab -->
+                    <div class="tab-content" id="approach-tab">
+                        <div class="learning-content">
+                            {{ problem.approach_explanation|markdown_to_html }}
+                        </div>
+                    </div>
+                    
+                    <!-- Preprocessing Tab -->
+                    <div class="tab-content" id="preprocessing-tab">
+                        <div class="learning-content">
+                            {{ problem.preprocessing_steps|markdown_to_html }}
+                        </div>
+                    </div>
+                    
+                    <!-- Architecture Tab -->
+                    <div class="tab-content" id="architecture-tab">
+                        <div class="learning-content">
+                            {{ problem.model_architecture|markdown_to_html }}
+                        </div>
+                    </div>
+                    
+                    <!-- Try Model Tab -->
+                    <div class="tab-content" id="try-tab">
+                        <div class="learning-content">
+                            <h3>🎯 Ready to Test the Model?</h3>
+                            <p>Now that you understand how this model works, let's see it in action! Scroll down to the "Make Prediction" section below to try the model with your own inputs.</p>
+                            <div style="text-align: center; margin-top: 2rem;">
+                                <button class="btn" onclick="document.getElementById('prediction-section').scrollIntoView({behavior: 'smooth'})">
+                                    <i class="fas fa-arrow-down"></i> Jump to Prediction Section
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Code Tab -->
+                    <div class="tab-content" id="code-tab">
+                        <div class="learning-content">
+                            <h3>📥 Download Complete Implementation</h3>
+                            <p>Get the full Python code including data preprocessing, model training, and evaluation!</p>
+                            <div class="code-download-section">
+                                <pre><code>{{ problem.code_snippet }}</code></pre>
+                                <button class="btn" onclick="downloadCode()">
+                                    <i class="fas fa-download"></i> Download Code as .py File
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Dataset Sample Card -->
         <div class="card">
             <div class="card-header">
@@ -732,7 +1202,7 @@
         </div>
         
         <!-- Prediction Form Card -->
-        <div class="card">
+        <div class="card" id="prediction-section">
             <div class="card-header">
                 <div class="card-icon">
                     <i class="fas fa-calculator"></i>
@@ -884,11 +1354,39 @@
             <div class="results" id="results">
                 <div class="prediction-result" id="predictionResult"></div>
                 
-                <!-- Feature Explanation Section -->
+                <!-- Prediction Explanation (Why this prediction?) -->
+                <div class="ai-explanation" id="predictionExplanationSection" style="display:none;">
+                    <h4>
+                        <i class="fas fa-question-circle"></i>
+                        🤔 Why This Prediction?
+                    </h4>
+                    <div class="explanation-box">
+                        <div class="explanation-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="explanation-content" id="predictionExplanationText"></div>
+                    </div>
+                </div>
+                
+                <!-- Feature Impact Explanation (How features affected the model) -->
+                <div class="ai-explanation" id="featureImpactSection" style="display:none;">
+                    <h4>
+                        <i class="fas fa-chart-line"></i>
+                        📊 How Features Impacted This Prediction
+                    </h4>
+                    <div class="explanation-box">
+                        <div class="explanation-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <div class="explanation-content" id="featureImpactText"></div>
+                    </div>
+                </div>
+                
+                <!-- Feature Importance Visualization -->
                 <div class="feature-explanation" id="featureExplanation">
                     <h4>
                         <i class="fas fa-chart-bar"></i>
-                        Why This Prediction?
+                        Feature Importance Breakdown
                     </h4>
                     <p style="margin-bottom: 1rem; color: #666;">
                         Here are the key factors that influenced the model's prediction:
@@ -896,10 +1394,11 @@
                     <div class="feature-factors" id="featureFactors"></div>
                 </div>
                 
+                <!-- AI Recommendations -->
                 <div class="recommendations" id="recommendations">
                     <h4>
                         <i class="fas fa-lightbulb"></i>
-                        AI Recommendations
+                        💡 AI-Powered Recommendations
                     </h4>
                     <div class="recommendations-content" id="recommendationsText"></div>
                 </div>
@@ -1124,6 +1623,21 @@
                 confidenceElement.style.opacity = '0.9';
                 confidenceElement.innerHTML = `<strong>Confidence: ${confidence.toFixed(1)}%</strong>`;
                 predictionResult.appendChild(confidenceElement);
+            }
+            
+            // Display AI-powered explanations
+            if (data.prediction_explanation) {
+                const predictionExplanationSection = document.getElementById('predictionExplanationSection');
+                const predictionExplanationText = document.getElementById('predictionExplanationText');
+                predictionExplanationText.innerHTML = data.prediction_explanation;
+                predictionExplanationSection.style.display = 'block';
+            }
+            
+            if (data.feature_impact_explanation) {
+                const featureImpactSection = document.getElementById('featureImpactSection');
+                const featureImpactText = document.getElementById('featureImpactText');
+                featureImpactText.innerHTML = data.feature_impact_explanation;
+                featureImpactSection.style.display = 'block';
             }
             
             // Format recommendations with proper bullet points
@@ -1362,6 +1876,46 @@
                 }
             }
             return cookieValue;
+        }
+        
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all buttons and contents
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked button and corresponding content
+                    this.classList.add('active');
+                    document.getElementById(tabName + '-tab').classList.add('active');
+                    
+                    // Scroll to top of tabs section
+                    document.querySelector('.learning-tabs').scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                });
+            });
+        });
+        
+        // Code download functionality
+        function downloadCode() {
+            const codeSnippet = `{{ problem.code_snippet|escapejs }}`;
+            const blob = new Blob([codeSnippet], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '{{ problem.title|slugify }}_model.py';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
         }
     </script>
 </body>

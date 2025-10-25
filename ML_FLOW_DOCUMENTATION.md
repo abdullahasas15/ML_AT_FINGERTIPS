@@ -1,3 +1,5 @@
+python3 ml_at_fingertips/manage.py runserver
+
 # 🔄 Complete ML Prediction Flow Documentation
 
 ## 📌 Overview
