@@ -96,37 +96,88 @@ def create_simple_feature_importance(input_data, feature_names, prediction, mode
                 'contribution': 'positive' if (prediction > 30 and value > 5) or (prediction <= 30 and value < 5) else 'negative'
             }
     else:
-        medical_weights = {
-            'age': 0.15,
-            'sex': 0.08,
-            'cp': 0.12,
-            'trestbps': 0.10,
-            'chol': 0.10,
-            'fbs': 0.06,
-            'restecg': 0.05,
-            'thalach': 0.08,
-            'exang': 0.08,
-            'oldpeak': 0.10,
-            'slope': 0.06,
-            'ca': 0.10,
-            'thal': 0.12
-        }
-        feature_importance = {}
-        for i, feature_name in enumerate(feature_names):
-            value = input_data[i]
-            weight = medical_weights.get(feature_name, 0.05)
-            if prediction == 1:
-                if feature_name in ['age', 'trestbps', 'chol', 'oldpeak', 'ca']:
-                    adjusted_importance = weight * (1 + value / 100)
-                else:
-                    adjusted_importance = weight * (1 + value / 10)
-            else:
-                adjusted_importance = weight * (1 - value / 100)
-            feature_importance[feature_name] = {
-                'importance': max(0.01, adjusted_importance),
-                'value': float(value),
-                'contribution': 'positive' if (prediction == 1 and value > 50) or (prediction == 0 and value < 50) else 'negative'
+        # Classification models (Heart Disease, Loan Approval, etc.)
+        # Detect if it's a loan model based on feature names
+        is_loan_model = any(feat in feature_names for feat in ['ApplicantIncome', 'Credit_History', 'LoanAmount'])
+        
+        if is_loan_model:
+            # Loan approval feature weights
+            loan_weights = {
+                'Credit_History': 0.35,      # Most important
+                'ApplicantIncome': 0.15,
+                'CoapplicantIncome': 0.12,
+                'LoanAmount': 0.12,
+                'Loan_Amount_Term': 0.08,
+                'Education': 0.06,
+                'Self_Employed': 0.04,
+                'Property_Area': 0.03,
+                'Married': 0.03,
+                'Dependents': 0.02,
+                'Gender': 0.00
             }
+            feature_importance = {}
+            for i, feature_name in enumerate(feature_names):
+                value = input_data[i]
+                weight = loan_weights.get(feature_name, 0.05)
+                
+                # Adjust importance based on prediction and value
+                if prediction == 1:  # Approved
+                    if feature_name == 'Credit_History' and value == 1:
+                        adjusted_importance = weight * 1.5  # Big boost for good credit
+                    elif feature_name in ['ApplicantIncome', 'CoapplicantIncome'] and value > 3000:
+                        adjusted_importance = weight * 1.3  # Good income
+                    elif feature_name == 'LoanAmount' and value < 200:
+                        adjusted_importance = weight * 1.2  # Reasonable loan
+                    else:
+                        adjusted_importance = weight
+                else:  # Rejected
+                    if feature_name == 'Credit_History' and value == 0:
+                        adjusted_importance = weight * 2.0  # Major factor
+                    elif feature_name in ['ApplicantIncome', 'CoapplicantIncome'] and value < 2000:
+                        adjusted_importance = weight * 1.4  # Low income issue
+                    elif feature_name == 'LoanAmount' and value > 300:
+                        adjusted_importance = weight * 1.3  # High loan amount
+                    else:
+                        adjusted_importance = weight
+                
+                feature_importance[feature_name] = {
+                    'importance': max(0.01, adjusted_importance),
+                    'value': float(value),
+                    'contribution': 'positive' if prediction == 1 else 'negative'
+                }
+        else:
+            # Heart disease feature weights
+            medical_weights = {
+                'age': 0.15,
+                'sex': 0.08,
+                'cp': 0.12,
+                'trestbps': 0.10,
+                'chol': 0.10,
+                'fbs': 0.06,
+                'restecg': 0.05,
+                'thalach': 0.08,
+                'exang': 0.08,
+                'oldpeak': 0.10,
+                'slope': 0.06,
+                'ca': 0.10,
+                'thal': 0.12
+            }
+            feature_importance = {}
+            for i, feature_name in enumerate(feature_names):
+                value = input_data[i]
+                weight = medical_weights.get(feature_name, 0.05)
+                if prediction == 1:
+                    if feature_name in ['age', 'trestbps', 'chol', 'oldpeak', 'ca']:
+                        adjusted_importance = weight * (1 + value / 100)
+                    else:
+                        adjusted_importance = weight * (1 + value / 10)
+                else:
+                    adjusted_importance = weight * (1 - value / 100)
+                feature_importance[feature_name] = {
+                    'importance': max(0.01, adjusted_importance),
+                    'value': float(value),
+                    'contribution': 'positive' if (prediction == 1 and value > 50) or (prediction == 0 and value < 50) else 'negative'
+                }
     return sorted(feature_importance.items(), key=lambda x: x[1]['importance'], reverse=True)
 
 @login_required
@@ -622,6 +673,35 @@ Explain in 2-3 sentences WHY the model predicted this specific price. Focus on:
 
 Be conversational, educational, and beginner-friendly. No technical jargon."""
 
+        elif 'loan' in problem_title.lower() and 'approval' in problem_title.lower():
+            # Loan approval prediction
+            status = "APPROVED ✅" if prediction == 1 else "REJECTED ❌"
+            applicant_income = features.get('ApplicantIncome', 0)
+            coapplicant_income = features.get('CoapplicantIncome', 0)
+            loan_amount = features.get('LoanAmount', 0)
+            credit_history = features.get('Credit_History', 0)
+            education = features.get('Education', 0)
+            
+            total_income = applicant_income + coapplicant_income
+            credit_status = "Good" if credit_history == 1 else "No credit history" if credit_history == 0 else "Unknown"
+            education_level = "Graduate" if education == 1 else "Not Graduate"
+            
+            prompt = f"""You are an AI financial advisor explaining loan decisions to applicants.
+
+**Decision:** Loan {status}
+**Applicant:** Monthly income ${applicant_income:,} + Co-applicant ${coapplicant_income:,} = ${total_income:,}
+**Loan Amount:** ${loan_amount:,}
+**Credit History:** {credit_status}
+**Education:** {education_level}
+
+Explain in 2-3 sentences WHY the model made this decision. Focus on:
+1. The most critical factors that influenced approval/rejection
+2. How income-to-loan ratio and credit history impacted the decision
+3. What this means for the applicant's financial profile
+
+If REJECTED, briefly hint at what could improve approval chances.
+Be empathetic, clear, and actionable. No technical jargon."""
+
         else:
             # Heart disease prediction
             risk = "HIGH RISK" if prediction == 1 else "LOW RISK"
@@ -671,6 +751,17 @@ Be conversational, educational, empathetic, and beginner-friendly. No technical 
         return f"This {int(prediction)}-minute prediction is based on the distance ({features.get('haversine_km', 0):.1f} km) and departure time (hour {features.get('hour', 0)}). The model learned from millions of trips that this combination typically results in this travel duration."
     elif 'car' in problem_title.lower():
         return f"The model predicted ₹{int(prediction):,} based on the car's brand reputation, {features.get('age', 0)} years of age, and {features.get('km_driven', 0):,} km mileage. These factors significantly impact resale value."
+    elif 'loan' in problem_title.lower() and 'approval' in problem_title.lower():
+        status = "approved" if prediction == 1 else "rejected"
+        total_income = features.get('ApplicantIncome', 0) + features.get('CoapplicantIncome', 0)
+        credit_history = features.get('Credit_History', 0)
+        credit_status = "good credit history" if credit_history == 1 else "no established credit history"
+        
+        if prediction == 1:
+            return f"Your loan was {status} primarily due to your {credit_status}, combined monthly income of ${total_income:,}, and favorable debt-to-income ratio. The model found your financial profile meets lending criteria based on thousands of successful loan applications."
+        else:
+            main_issue = "lack of credit history" if credit_history == 0 else "income-to-loan ratio"
+            return f"Your loan was {status} mainly due to {main_issue}. The model identified this as a key risk factor based on historical loan performance data. Building {credit_status.replace('no ', '')} and improving your income-to-debt ratio could significantly improve approval chances."
     else:
         risk = "high" if prediction == 1 else "low"
         return f"The model predicted {risk} risk based on your health parameters, particularly age ({features.get('age', 0)}), cholesterol ({features.get('chol', 0)}), and blood pressure ({features.get('trestbps', 0)}). These indicators are key factors in cardiovascular health assessment."
@@ -786,7 +877,7 @@ Be specific to the actual values provided. Be empathetic, conversational and edu
 
 
 def get_perplexity_recommendations(prediction, features, problem_title, model_type):
-    def get_fallback_recommendations(prediction, features, model_type):
+    def get_fallback_recommendations(prediction, features, model_type, problem_title=""):
         if model_type.lower() == 'regression':
             eta_minutes = int(prediction)
             if eta_minutes <= 15:
@@ -829,7 +920,8 @@ def get_perplexity_recommendations(prediction, features, problem_title, model_ty
                 recommendations.append("• Plan for extra travel time")
                 recommendations.append("• Consider public transportation if available")
                 return "\n".join(recommendations)
-        else:
+        elif not ('loan' in problem_title.lower() and 'approval' in problem_title.lower()):
+            # Heart disease or other classification
             if prediction == 1:
                 age = features.get('age', 0)
                 chol = features.get('chol', 0)
@@ -863,8 +955,78 @@ def get_perplexity_recommendations(prediction, features, problem_title, model_ty
                 recommendations.append("• Avoid smoking and excessive alcohol")
                 recommendations.append("\n**Prevention is Key:** Keep up your healthy lifestyle to maintain low risk!")
                 return "\n".join(recommendations)
+        
+        if 'loan' in problem_title.lower() and 'approval' in problem_title.lower():
+            # Loan approval recommendations
+            if prediction == 1:
+                # Approved
+                recommendations = []
+                recommendations.append("✅ **Congratulations! Loan Approved**")
+                recommendations.append("\n**Next Steps:**")
+                recommendations.append("• Review loan terms and interest rates carefully")
+                recommendations.append("• Ensure you understand repayment schedule and EMI amount")
+                recommendations.append("• Set up automatic payments to avoid missing deadlines")
+                recommendations.append("• Consider loan insurance for financial security")
+                recommendations.append("\n**Financial Best Practices:**")
+                recommendations.append("• Maintain your good credit history with timely payments")
+                recommendations.append("• Avoid taking multiple loans simultaneously")
+                recommendations.append("• Build an emergency fund (3-6 months expenses)")
+                recommendations.append("• Keep debt-to-income ratio below 40%")
+                recommendations.append("\n**Smart Tip:** Use the loan wisely and stick to your repayment plan!")
+                return "\n".join(recommendations)
+            else:
+                # Rejected - Provide actionable improvement advice
+                credit_history = features.get('Credit_History', 0)
+                total_income = features.get('ApplicantIncome', 0) + features.get('CoapplicantIncome', 0)
+                loan_amount = features.get('LoanAmount', 0)
+                has_coapplicant = features.get('CoapplicantIncome', 0) > 0
+                
+                recommendations = []
+                recommendations.append("❌ **Loan Application Not Approved - Here's How to Improve**")
+                recommendations.append("\n**Critical Issues Identified:**")
+                
+                # Credit history issue
+                if credit_history == 0:
+                    recommendations.append("• **No Credit History:** This is the #1 factor affecting your application")
+                    recommendations.append("  - Apply for a secured credit card (easier to get)")
+                    recommendations.append("  - Make small purchases and pay in full monthly for 6-12 months")
+                    recommendations.append("  - Consider becoming an authorized user on someone's card")
+                
+                # Income-to-loan ratio issue
+                if loan_amount > 0 and total_income > 0:
+                    loan_to_income_ratio = (loan_amount * 1000) / (total_income * 12)
+                    if loan_to_income_ratio > 3:
+                        recommendations.append("• **High Debt-to-Income Ratio:** Loan amount too high for your income")
+                        recommended_max = int(total_income * 12 * 3 / 1000)
+                        recommendations.append(f"  - Reduce loan amount to ${recommended_max:,} or below")
+                        recommendations.append("  - Or increase income by $" + str(int((loan_amount * 1000 / 36) - total_income)) + "/month")
+                
+                # No co-applicant
+                if not has_coapplicant:
+                    recommendations.append("• **Single Income Source:** Adding a co-applicant strengthens your application")
+                    recommendations.append("  - Include spouse's or family member's income")
+                    recommendations.append("  - Co-applicant should have good credit history")
+                
+                recommendations.append("\n**Action Plan (Timeline: 6-12 months):**")
+                recommendations.append("1️⃣ **Months 1-3:** Build credit with secured card, make all payments on time")
+                recommendations.append("2️⃣ **Months 3-6:** Increase income or reduce loan amount, save for larger down payment")
+                recommendations.append("3️⃣ **Months 6-9:** Monitor credit score monthly, reduce existing debts if any")
+                recommendations.append("4️⃣ **Months 9-12:** Reapply with improved credit, better income ratio, and co-applicant")
+                
+                recommendations.append("\n**Alternative Options Right Now:**")
+                recommendations.append("• Consider a smaller loan amount (50-60% of requested)")
+                recommendations.append("• Explore secured loans with collateral")
+                recommendations.append("• Check credit union or community bank options")
+                recommendations.append("• Investigate government-backed loan programs")
+                
+                return "\n".join(recommendations)
+        else:
+            # Default fallback
+            return "No specific recommendations available for this prediction."
+    
     try:
         api_key = "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"
+        
         if model_type.lower() == 'regression':
             eta_minutes = int(prediction)
             if eta_minutes <= 15:
@@ -883,6 +1045,40 @@ def get_perplexity_recommendations(prediction, features, problem_title, model_ty
 - Pickup Time: {pickup_hour}:00
 - Route Features: {json.dumps(features, indent=2)}
 Focus on {advice_type}. Provide practical recommendations for optimizing travel time and avoiding delays. Keep response concise but comprehensive (max 200 words)."""
+        elif 'loan' in problem_title.lower() and 'approval' in problem_title.lower():
+            # Loan approval AI recommendations
+            status = "approved" if prediction == 1 else "rejected"
+            total_income = features.get('ApplicantIncome', 0) + features.get('CoapplicantIncome', 0)
+            loan_amount = features.get('LoanAmount', 0)
+            credit_history = features.get('Credit_History', 0)
+            credit_status = "good credit history" if credit_history == 1 else "no credit history"
+            
+            if prediction == 1:
+                prompt = f"""Based on a loan approval prediction, provide specific, actionable financial advice for a borrower with:
+- Loan Amount: ${loan_amount:,}
+- Total Income: ${total_income:,}/month
+- Credit History: {credit_status}
+- Status: APPROVED
+
+Provide practical recommendations for:
+1. Responsible loan management and repayment strategies
+2. Maintaining good credit while servicing the loan
+3. Financial best practices to avoid future debt issues
+
+Keep response concise, encouraging, and actionable (max 200 words)."""
+            else:
+                prompt = f"""Based on a loan rejection, provide specific, actionable advice for improving approval chances:
+- Requested Loan: ${loan_amount:,}
+- Total Income: ${total_income:,}/month
+- Credit History: {credit_status}
+- Status: REJECTED
+
+Provide:
+1. Top 3 reasons why the application was likely rejected
+2. Specific steps to improve credit profile (with timeline)
+3. Alternative options available right now
+
+Be empathetic, specific, and actionable. Focus on realistic improvements (max 200 words)."""
         else:
             if prediction == 1:
                 risk_level = "high risk"
@@ -918,7 +1114,7 @@ Focus on {advice_type}. Provide evidence-based, practical recommendations that a
             return result['choices'][0]['message']['content']
     except:
         pass
-    return get_fallback_recommendations(prediction, features, model_type)
+    return get_fallback_recommendations(prediction, features, model_type, problem_title)
 
 
 # ==================== CONTRIBUTION VIEWS ====================
