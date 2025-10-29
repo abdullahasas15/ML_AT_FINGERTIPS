@@ -1,0 +1,271 @@
+{% extends 'app_base.html' %}
+{% load static %}
+
+{% block title %}Contribute Your ML Model{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">
+                        <i class="fas fa-upload"></i> Contribute to Learning Hub
+                    </h2>
+                    <p class="mb-0 mt-2">Share your ML model with the community and help others learn!</p>
+                </div>
+                
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle"></i> Contribution Guidelines</h5>
+                        <ul>
+                            <li>Upload your trained ML model file (.pkl, .joblib, .h5, etc.)</li>
+                            <li>Provide clear description and documentation</li>
+                            <li>Include sample dataset and code if possible</li>
+                            <li>Your contribution will be reviewed before appearing in the learning hub</li>
+                            <li>All approved contributions will be credited to you</li>
+                        </ul>
+                    </div>
+                    
+                    <form method="post" enctype="multipart/form-data" class="contribution-form">
+                        {% csrf_token %}
+                        
+                        <h4 class="border-bottom pb-2 mb-3"><i class="fas fa-info"></i> Basic Information</h4>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">
+                                    <strong>Project Title *</strong>
+                                </label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger">{{ form.title.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.model_type.id_for_label }}" class="form-label">
+                                    <strong>Model Type *</strong>
+                                </label>
+                                {{ form.model_type }}
+                                {% if form.model_type.errors %}
+                                    <div class="text-danger">{{ form.model_type.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.selected_model.id_for_label }}" class="form-label">
+                                    <strong>Algorithm Used</strong>
+                                </label>
+                                {{ form.selected_model }}
+                                {% if form.selected_model.errors %}
+                                    <div class="text-danger">{{ form.selected_model.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">
+                                    <strong>Description *</strong>
+                                </label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <h4 class="border-bottom pb-2 mb-3 mt-4"><i class="fas fa-file-upload"></i> Upload Files</h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.model_file.id_for_label }}" class="form-label">
+                                    <strong>Model File * (.pkl, .joblib, .h5)</strong>
+                                </label>
+                                {{ form.model_file }}
+                                {% if form.model_file.errors %}
+                                    <div class="text-danger">{{ form.model_file.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">{{ form.model_file.help_text }}</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.scaler_file.id_for_label }}" class="form-label">
+                                    <strong>Scaler/Preprocessor File (optional)</strong>
+                                </label>
+                                {{ form.scaler_file }}
+                                {% if form.scaler_file.errors %}
+                                    <div class="text-danger">{{ form.scaler_file.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.dataset_file.id_for_label }}" class="form-label">
+                                    <strong>Sample Dataset (optional)</strong>
+                                </label>
+                                {{ form.dataset_file }}
+                                {% if form.dataset_file.errors %}
+                                    <div class="text-danger">{{ form.dataset_file.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.code_file.id_for_label }}" class="form-label">
+                                    <strong>Code File (optional .py or .ipynb)</strong>
+                                </label>
+                                {{ form.code_file }}
+                                {% if form.code_file.errors %}
+                                    <div class="text-danger">{{ form.code_file.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <h4 class="border-bottom pb-2 mb-3 mt-4"><i class="fas fa-database"></i> Data & Features</h4>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.dataset_sample_text.id_for_label }}" class="form-label">
+                                    <strong>Sample Data (JSON format)</strong>
+                                </label>
+                                {{ form.dataset_sample_text }}
+                                {% if form.dataset_sample_text.errors %}
+                                    <div class="text-danger">{{ form.dataset_sample_text.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">{{ form.dataset_sample_text.help_text }}</small>
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.features_description_text.id_for_label }}" class="form-label">
+                                    <strong>Features Description (JSON format)</strong>
+                                </label>
+                                {{ form.features_description_text }}
+                                {% if form.features_description_text.errors %}
+                                    <div class="text-danger">{{ form.features_description_text.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">{{ form.features_description_text.help_text }}</small>
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.accuracy_scores_text.id_for_label }}" class="form-label">
+                                    <strong>Model Performance Metrics (JSON format)</strong>
+                                </label>
+                                {{ form.accuracy_scores_text }}
+                                {% if form.accuracy_scores_text.errors %}
+                                    <div class="text-danger">{{ form.accuracy_scores_text.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">{{ form.accuracy_scores_text.help_text }}</small>
+                            </div>
+                        </div>
+                        
+                        <h4 class="border-bottom pb-2 mb-3 mt-4"><i class="fas fa-code"></i> Code & Implementation</h4>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.code_snippet.id_for_label }}" class="form-label">
+                                    <strong>Training/Prediction Code</strong>
+                                </label>
+                                {{ form.code_snippet }}
+                                {% if form.code_snippet.errors %}
+                                    <div class="text-danger">{{ form.code_snippet.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.requirements.id_for_label }}" class="form-label">
+                                    <strong>Python Dependencies</strong>
+                                </label>
+                                {{ form.requirements }}
+                                {% if form.requirements.errors %}
+                                    <div class="text-danger">{{ form.requirements.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">List required packages (one per line)</small>
+                            </div>
+                        </div>
+                        
+                        <h4 class="border-bottom pb-2 mb-3 mt-4"><i class="fas fa-graduation-cap"></i> Learning Content (Optional)</h4>
+                        <p class="text-muted">Help others learn by explaining your approach!</p>
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.problem_statement_detail.id_for_label }}" class="form-label">
+                                    <strong>Problem Explanation</strong>
+                                </label>
+                                {{ form.problem_statement_detail }}
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.approach_explanation.id_for_label }}" class="form-label">
+                                    <strong>Your Approach & Model Selection</strong>
+                                </label>
+                                {{ form.approach_explanation }}
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.preprocessing_steps.id_for_label }}" class="form-label">
+                                    <strong>Data Preprocessing Steps</strong>
+                                </label>
+                                {{ form.preprocessing_steps }}
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.model_architecture.id_for_label }}" class="form-label">
+                                    <strong>Model Architecture & Hyperparameters</strong>
+                                </label>
+                                {{ form.model_architecture }}
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.model_info.id_for_label }}" class="form-label">
+                                    <strong>Additional Information</strong>
+                                </label>
+                                {{ form.model_info }}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 d-flex justify-content-between">
+                            <a href="{% url 'home' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i> Submit Contribution
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .contribution-form label {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .contribution-form .form-control {
+        border: 2px solid #e0e0e0;
+        border-radius: 5px;
+    }
+    
+    .contribution-form .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+</style>
+{% endblock %}

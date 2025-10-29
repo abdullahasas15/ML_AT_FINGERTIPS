@@ -1,0 +1,182 @@
+{% extends 'app_base.html' %}
+{% load static %}
+
+{% block title %}Review Contributions - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row">
+        <div class="col-lg-11 mx-auto">
+            <h2 class="mb-4">
+                <i class="fas fa-user-shield"></i> Admin: Review Model Contributions
+            </h2>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <!-- Pending Contributions -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="fas fa-hourglass-half"></i> Pending Review 
+                        <span class="badge badge-dark">{{ pending_contributions.count }}</span>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if pending_contributions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Contributor</th>
+                                        <th>Type</th>
+                                        <th>Submitted</th>
+                                        <th>Files</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for contribution in pending_contributions %}
+                                        <tr>
+                                            <td>{{ contribution.id }}</td>
+                                            <td>
+                                                <strong>{{ contribution.title }}</strong><br>
+                                                <small class="text-muted">{{ contribution.description|truncatewords:15 }}</small>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-user"></i> {{ contribution.contributor.username }}
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-info">{{ contribution.get_model_type_display }}</span>
+                                            </td>
+                                            <td>{{ contribution.submitted_at|date:"M d, Y" }}</td>
+                                            <td>
+                                                {% if contribution.model_file %}<i class="fas fa-file text-success" title="Model"></i>{% endif %}
+                                                {% if contribution.scaler_file %}<i class="fas fa-cog text-primary" title="Scaler"></i>{% endif %}
+                                                {% if contribution.dataset_file %}<i class="fas fa-database text-info" title="Dataset"></i>{% endif %}
+                                                {% if contribution.code_file %}<i class="fas fa-code text-warning" title="Code"></i>{% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'review_contribution_detail' contribution.id %}" 
+                                                   class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i> Review
+                                                </a>
+                                                <a href="{% url 'approve_contribution' contribution.id %}" 
+                                                   class="btn btn-sm btn-success"
+                                                   onclick="return confirm('Approve this contribution?')">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                                <form method="post" action="{% url 'reject_contribution' contribution.id %}" 
+                                                      style="display: inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-danger"
+                                                            onclick="return confirm('Reject this contribution?')">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <p class="text-muted">No pending contributions to review!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- All Contributions -->
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-list"></i> Recent Contributions (All Status)
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Contributor</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Submitted</th>
+                                    <th>Reviewed</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contribution in all_contributions %}
+                                    <tr>
+                                        <td>{{ contribution.id }}</td>
+                                        <td>
+                                            <strong>{{ contribution.title }}</strong>
+                                        </td>
+                                        <td>{{ contribution.contributor.username }}</td>
+                                        <td>{{ contribution.get_model_type_display }}</td>
+                                        <td>
+                                            {% if contribution.status == 'pending' %}
+                                                <span class="badge badge-warning">Pending</span>
+                                            {% elif contribution.status == 'approved' %}
+                                                <span class="badge badge-success">Approved</span>
+                                            {% else %}
+                                                <span class="badge badge-danger">Rejected</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ contribution.submitted_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if contribution.reviewed_at %}
+                                                {{ contribution.reviewed_at|date:"M d, Y" }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'review_contribution_detail' contribution.id %}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a href="{% url 'home' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table td, .table th {
+        vertical-align: middle;
+    }
+    
+    .badge {
+        padding: 5px 10px;
+    }
+</style>
+{% endblock %}

@@ -3,13 +3,18 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
+from django.utils import timezone
+from django.contrib.admin.views.decorators import staff_member_required
 import json
 import pickle
 import joblib
 import os
+import pandas as pd
 from django.conf import settings
 import requests
-from .models import ProblemStatement
+from .models import ProblemStatement, ModelContribution
+from .forms import ModelContributionForm, ContributionReviewForm
 import numpy as np
 from sklearn.inspection import permutation_importance
 import warnings
@@ -914,3 +919,214 @@ Focus on {advice_type}. Provide evidence-based, practical recommendations that a
     except:
         pass
     return get_fallback_recommendations(prediction, features, model_type)
+
+
+# ==================== CONTRIBUTION VIEWS ====================
+
+@login_required
+def submit_contribution(request):
+    """View for users to submit their ML model contributions"""
+    if request.method == 'POST':
+        form = ModelContributionForm(request.POST, request.FILES)
+        if form.is_valid():
+            contribution = form.save(commit=False)
+            contribution.contributor = request.user
+            contribution.status = 'pending'
+            
+            # Auto-extract dataset sample if dataset file is uploaded
+            if contribution.dataset_file and not contribution.dataset_sample:
+                try:
+                    contribution.dataset_sample = extract_dataset_sample(contribution.dataset_file)
+                except Exception as e:
+                    print(f"Error extracting dataset sample: {e}")
+            
+            contribution.save()
+            messages.success(
+                request,
+                'Your contribution has been submitted successfully! '
+                'It will appear in the learning hub once approved by our team.'
+            )
+            return redirect('my_contributions')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ModelContributionForm()
+    
+    return render(request, 'contribution_form.html', {'form': form})
+
+
+@login_required
+def my_contributions(request):
+    """View for users to see their own contributions"""
+    contributions = ModelContribution.objects.filter(contributor=request.user).order_by('-submitted_at')
+    return render(request, 'my_contributions.html', {'contributions': contributions})
+
+
+@staff_member_required
+def review_contributions(request):
+    """Admin view to review pending contributions"""
+    pending_contributions = ModelContribution.objects.filter(status='pending').order_by('-submitted_at')
+    all_contributions = ModelContribution.objects.all().order_by('-submitted_at')[:50]
+    
+    context = {
+        'pending_contributions': pending_contributions,
+        'all_contributions': all_contributions,
+    }
+    return render(request, 'admin_review.html', context)
+
+
+@staff_member_required
+def review_contribution_detail(request, contribution_id):
+    """Admin view to review a specific contribution in detail"""
+    contribution = get_object_or_404(ModelContribution, id=contribution_id)
+    
+    if request.method == 'POST':
+        form = ContributionReviewForm(request.POST, instance=contribution)
+        if form.is_valid():
+            contribution = form.save(commit=False)
+            contribution.reviewed_at = timezone.now()
+            
+            # If approved, create a ProblemStatement from the contribution
+            if contribution.status == 'approved' and request.POST.get('create_problem_statement'):
+                try:
+                    create_problem_statement_from_contribution(contribution)
+                    messages.success(request, 'Contribution approved and added to the learning hub!')
+                except Exception as e:
+                    messages.error(request, f'Contribution approved but error creating problem statement: {e}')
+            else:
+                contribution.save()
+                messages.success(request, f'Contribution {contribution.status}!')
+            
+            return redirect('review_contributions')
+    else:
+        form = ContributionReviewForm(instance=contribution)
+    
+    context = {
+        'contribution': contribution,
+        'form': form,
+    }
+    return render(request, 'review_detail.html', context)
+
+
+@staff_member_required
+def approve_contribution(request, contribution_id):
+    """Quick approve a contribution and create ProblemStatement"""
+    contribution = get_object_or_404(ModelContribution, id=contribution_id)
+    
+    try:
+        # Update contribution status
+        contribution.status = 'approved'
+        contribution.reviewed_at = timezone.now()
+        contribution.save()
+        
+        # Create ProblemStatement from contribution
+        problem_statement = create_problem_statement_from_contribution(contribution)
+        
+        messages.success(
+            request,
+            f'Contribution approved! "{problem_statement.title}" is now live in the learning hub.'
+        )
+    except Exception as e:
+        messages.error(request, f'Error approving contribution: {e}')
+    
+    return redirect('review_contributions')
+
+
+@staff_member_required
+def reject_contribution(request, contribution_id):
+    """Quick reject a contribution"""
+    contribution = get_object_or_404(ModelContribution, id=contribution_id)
+    
+    contribution.status = 'rejected'
+    contribution.reviewed_at = timezone.now()
+    if request.POST.get('admin_notes'):
+        contribution.admin_notes = request.POST.get('admin_notes')
+    contribution.save()
+    
+    messages.info(request, f'Contribution "{contribution.title}" has been rejected.')
+    return redirect('review_contributions')
+
+
+# ==================== HELPER FUNCTIONS ====================
+
+def extract_dataset_sample(dataset_file, max_rows=5):
+    """Extract sample rows from uploaded dataset file"""
+    file_extension = dataset_file.name.split('.')[-1].lower()
+    
+    try:
+        if file_extension == 'csv':
+            df = pd.read_csv(dataset_file)
+        elif file_extension in ['xlsx', 'xls']:
+            df = pd.read_excel(dataset_file)
+        elif file_extension == 'json':
+            df = pd.read_json(dataset_file)
+        else:
+            return None
+        
+        # Get first few rows and convert to JSON
+        sample_data = df.head(max_rows).to_dict('records')
+        return sample_data
+    except Exception as e:
+        print(f"Error reading dataset file: {e}")
+        return None
+
+
+def create_problem_statement_from_contribution(contribution):
+    """Create a ProblemStatement from an approved ModelContribution"""
+    
+    # Move model files to the models1 directory
+    model_file_path = move_contribution_file_to_models(contribution.model_file, 'model')
+    scaler_file_path = None
+    if contribution.scaler_file:
+        scaler_file_path = move_contribution_file_to_models(contribution.scaler_file, 'scaler')
+    
+    # Create ProblemStatement
+    problem_statement = ProblemStatement.objects.create(
+        title=contribution.title,
+        description=contribution.description,
+        dataset_sample=contribution.dataset_sample or [],
+        model_type=contribution.model_type,
+        model_file=model_file_path,
+        scaler_file=scaler_file_path,
+        features_description=contribution.features_description or {},
+        accuracy_scores=contribution.accuracy_scores or {},
+        selected_model=contribution.selected_model or contribution.model_type,
+        code_snippet=contribution.code_snippet or "# Code will be added soon",
+        model_info=contribution.model_info or "",
+        problem_statement_detail=contribution.problem_statement_detail or "",
+        approach_explanation=contribution.approach_explanation or "",
+        preprocessing_steps=contribution.preprocessing_steps or "",
+        model_architecture=contribution.model_architecture or "",
+    )
+    
+    return problem_statement
+
+
+def move_contribution_file_to_models(file_field, file_type='model'):
+    """Move uploaded contribution file to the models1 directory"""
+    import shutil
+    
+    # Get the source file path
+    source_path = file_field.path
+    
+    # Determine destination directory
+    models_dir = os.path.join(settings.BASE_DIR, 'classifier', 'models1')
+    os.makedirs(models_dir, exist_ok=True)
+    
+    # Create a unique filename
+    filename = os.path.basename(source_path)
+    dest_path = os.path.join(models_dir, filename)
+    
+    # If file exists, add a counter
+    counter = 1
+    base_name, ext = os.path.splitext(filename)
+    while os.path.exists(dest_path):
+        new_filename = f"{base_name}_{counter}{ext}"
+        dest_path = os.path.join(models_dir, new_filename)
+        counter += 1
+    
+    # Copy the file
+    shutil.copy2(source_path, dest_path)
+    
+    # Return relative path for storage in database
+    return os.path.join('classifier', 'models1', os.path.basename(dest_path))

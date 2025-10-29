@@ -1,0 +1,264 @@
+{% extends 'app_base.html' %}
+{% load static %}
+
+{% block title %}Review: {{ contribution.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-lg">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-clipboard-check"></i> Review Contribution
+                    </h3>
+                </div>
+                
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <!-- Contribution Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h4>{{ contribution.title }}</h4>
+                            <p class="text-muted">
+                                <i class="fas fa-user"></i> Submitted by: 
+                                <strong>{{ contribution.contributor.username }}</strong>
+                            </p>
+                            <p class="text-muted">
+                                <i class="fas fa-clock"></i> {{ contribution.submitted_at|date:"F d, Y - H:i" }}
+                            </p>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <h5>Current Status:</h5>
+                            {% if contribution.status == 'pending' %}
+                                <span class="badge badge-warning p-2">Pending Review</span>
+                            {% elif contribution.status == 'approved' %}
+                                <span class="badge badge-success p-2">Approved</span>
+                            {% else %}
+                                <span class="badge badge-danger p-2">Rejected</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Details Tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#basic">Basic Info</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#files">Files</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#data">Data & Features</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#code">Code</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#learning">Learning Content</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content mt-3">
+                        <!-- Basic Info Tab -->
+                        <div id="basic" class="tab-pane fade show active">
+                            <h5>Description:</h5>
+                            <p>{{ contribution.description }}</p>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <strong>Model Type:</strong> {{ contribution.get_model_type_display }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Algorithm:</strong> {{ contribution.selected_model|default:"Not specified" }}
+                                </div>
+                            </div>
+                            
+                            {% if contribution.requirements %}
+                                <h5 class="mt-4">Python Dependencies:</h5>
+                                <pre class="bg-light p-3">{{ contribution.requirements }}</pre>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Files Tab -->
+                        <div id="files" class="tab-pane fade">
+                            <table class="table">
+                                <tr>
+                                    <th>Model File:</th>
+                                    <td>
+                                        {% if contribution.model_file %}
+                                            <i class="fas fa-check text-success"></i> {{ contribution.model_file.name }}
+                                        {% else %}
+                                            <i class="fas fa-times text-danger"></i> Not uploaded
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Scaler File:</th>
+                                    <td>
+                                        {% if contribution.scaler_file %}
+                                            <i class="fas fa-check text-success"></i> {{ contribution.scaler_file.name }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Dataset File:</th>
+                                    <td>
+                                        {% if contribution.dataset_file %}
+                                            <i class="fas fa-check text-success"></i> {{ contribution.dataset_file.name }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Code File:</th>
+                                    <td>
+                                        {% if contribution.code_file %}
+                                            <i class="fas fa-check text-success"></i> {{ contribution.code_file.name }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <!-- Data & Features Tab -->
+                        <div id="data" class="tab-pane fade">
+                            {% if contribution.dataset_sample %}
+                                <h5>Sample Data:</h5>
+                                <pre class="bg-light p-3">{{ contribution.dataset_sample|truncatewords:100 }}</pre>
+                            {% endif %}
+                            
+                            {% if contribution.features_description %}
+                                <h5 class="mt-3">Features Description:</h5>
+                                <pre class="bg-light p-3">{{ contribution.features_description }}</pre>
+                            {% endif %}
+                            
+                            {% if contribution.accuracy_scores %}
+                                <h5 class="mt-3">Performance Metrics:</h5>
+                                <pre class="bg-light p-3">{{ contribution.accuracy_scores }}</pre>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Code Tab -->
+                        <div id="code" class="tab-pane fade">
+                            {% if contribution.code_snippet %}
+                                <h5>Code Snippet:</h5>
+                                <pre class="bg-dark text-light p-3" style="max-height: 500px; overflow-y: auto;">{{ contribution.code_snippet }}</pre>
+                            {% else %}
+                                <p class="text-muted">No code snippet provided</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Learning Content Tab -->
+                        <div id="learning" class="tab-pane fade">
+                            {% if contribution.problem_statement_detail %}
+                                <h5>Problem Explanation:</h5>
+                                <p>{{ contribution.problem_statement_detail }}</p>
+                            {% endif %}
+                            
+                            {% if contribution.approach_explanation %}
+                                <h5 class="mt-3">Approach & Model Selection:</h5>
+                                <p>{{ contribution.approach_explanation }}</p>
+                            {% endif %}
+                            
+                            {% if contribution.preprocessing_steps %}
+                                <h5 class="mt-3">Preprocessing Steps:</h5>
+                                <p>{{ contribution.preprocessing_steps }}</p>
+                            {% endif %}
+                            
+                            {% if contribution.model_architecture %}
+                                <h5 class="mt-3">Model Architecture:</h5>
+                                <p>{{ contribution.model_architecture }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <hr class="mt-4">
+                    
+                    <!-- Review Form -->
+                    <h4>Admin Review</h4>
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="{{ form.status.id_for_label }}">Status</label>
+                            {{ form.status }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.admin_notes.id_for_label }}">Admin Notes / Feedback</label>
+                            {{ form.admin_notes }}
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="create_problem_statement" 
+                                   name="create_problem_statement" checked>
+                            <label class="form-check-label" for="create_problem_statement">
+                                Create ProblemStatement and add to learning hub (only if approving)
+                            </label>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'review_contributions' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to List
+                            </a>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save"></i> Save Review
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Quick Actions -->
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <h5>Quick Actions:</h5>
+                        <a href="{% url 'approve_contribution' contribution.id %}" 
+                           class="btn btn-success"
+                           onclick="return confirm('Approve and publish this contribution?')">
+                            <i class="fas fa-check"></i> Quick Approve & Publish
+                        </a>
+                        
+                        <form method="post" action="{% url 'reject_contribution' contribution.id %}" 
+                              style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Reject this contribution?')">
+                                <i class="fas fa-times"></i> Quick Reject
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .nav-tabs .nav-link.active {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    pre {
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}

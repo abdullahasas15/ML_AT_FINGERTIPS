@@ -1,0 +1,140 @@
+{% extends 'app_base.html' %}
+{% load static %}
+
+{% block title %}My Contributions{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-folder-open"></i> My Contributions</h2>
+                <a href="{% url 'submit_contribution' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Contribution
+                </a>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% if contributions %}
+                <div class="row">
+                    {% for contribution in contributions %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card contribution-card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">{{ contribution.title }}</h5>
+                                    {% if contribution.status == 'pending' %}
+                                        <span class="badge badge-warning">Pending Review</span>
+                                    {% elif contribution.status == 'approved' %}
+                                        <span class="badge badge-success">Approved</span>
+                                    {% elif contribution.status == 'rejected' %}
+                                        <span class="badge badge-danger">Rejected</span>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-tag"></i> {{ contribution.get_model_type_display }}
+                                    </p>
+                                    <p>{{ contribution.description|truncatewords:30 }}</p>
+                                    
+                                    <div class="mt-3">
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i> Submitted: {{ contribution.submitted_at|date:"M d, Y" }}
+                                        </small>
+                                    </div>
+                                    
+                                    {% if contribution.admin_notes %}
+                                        <div class="alert alert-info mt-3">
+                                            <strong>Admin Feedback:</strong><br>
+                                            {{ contribution.admin_notes }}
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="mt-3">
+                                        <strong>Files Uploaded:</strong>
+                                        <ul class="mb-0 mt-2">
+                                            {% if contribution.model_file %}
+                                                <li><i class="fas fa-check text-success"></i> Model File</li>
+                                            {% endif %}
+                                            {% if contribution.scaler_file %}
+                                                <li><i class="fas fa-check text-success"></i> Scaler File</li>
+                                            {% endif %}
+                                            {% if contribution.dataset_file %}
+                                                <li><i class="fas fa-check text-success"></i> Dataset</li>
+                                            {% endif %}
+                                            {% if contribution.code_file %}
+                                                <li><i class="fas fa-check text-success"></i> Code File</li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light">
+                                    {% if contribution.status == 'approved' %}
+                                        <i class="fas fa-check-circle text-success"></i> 
+                                        Your contribution is live in the learning hub!
+                                    {% elif contribution.status == 'pending' %}
+                                        <i class="fas fa-hourglass-half text-warning"></i> 
+                                        Awaiting admin review
+                                    {% elif contribution.status == 'rejected' %}
+                                        <i class="fas fa-times-circle text-danger"></i> 
+                                        Not approved - please review feedback
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="card text-center py-5">
+                    <div class="card-body">
+                        <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                        <h4>No Contributions Yet</h4>
+                        <p class="text-muted">Share your ML models with the community!</p>
+                        <a href="{% url 'submit_contribution' %}" class="btn btn-primary mt-3">
+                            <i class="fas fa-plus"></i> Create Your First Contribution
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="{% url 'home' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .contribution-card {
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    
+    .contribution-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    
+    .contribution-card .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .badge {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}

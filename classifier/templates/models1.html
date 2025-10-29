@@ -275,6 +275,20 @@
             ML at Fingertips
         </div>
         <div class="nav-actions">
+            {% if user.is_staff %}
+                <a href="{% url 'review_contributions' %}" class="nav-btn" style="background: #28a745;">
+                    <i class="fas fa-user-shield"></i>
+                    Admin Review
+                </a>
+            {% endif %}
+            <a href="{% url 'submit_contribution' %}" class="nav-btn" style="background: #ff6b6b;">
+                <i class="fas fa-plus-circle"></i>
+                Contribute
+            </a>
+            <a href="{% url 'my_contributions' %}" class="nav-btn" style="background: #4ecdc4;">
+                <i class="fas fa-folder-open"></i>
+                My Contributions
+            </a>
             <a href="/" class="nav-btn home-btn">
                 <i class="fas fa-home"></i>
                 Home
