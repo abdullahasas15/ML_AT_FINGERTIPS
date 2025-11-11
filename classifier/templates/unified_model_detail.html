@@ -1081,27 +1081,60 @@
             <p class="description">{{ problem.description }}</p>
         </div>
         
-        <!-- Simple Problem Statement Card -->
+        <!-- Learning Content Tabs -->
         <div class="card" style="margin-bottom: 2rem;">
-            <div class="card-header">
-                <div class="card-icon">
-                    <i class="fas fa-question-circle"></i>
+            <div class="learning-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="problem">
+                        <i class="fas fa-lightbulb"></i>
+                        Problem & Approach
+                    </button>
+                    <button class="tab-btn" data-tab="preprocessing">
+                        <i class="fas fa-cogs"></i>
+                        Preprocessing
+                    </button>
+                    <button class="tab-btn" data-tab="architecture">
+                        <i class="fas fa-project-diagram"></i>
+                        Model Details
+                    </button>
                 </div>
-                <h2 class="card-title">About This Problem</h2>
-            </div>
-            <div class="learning-content" style="padding: 1.5rem;">
-                <p style="font-size: 1.05rem; line-height: 1.7; color: #444;">
-                    {{ problem.description }}
-                </p>
-                <div style="margin-top: 1.5rem; padding: 1rem; background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border-radius: 8px; border-left: 4px solid #667eea;">
-                    <p style="margin: 0; color: #555;">
-                        <strong>📊 Model:</strong> {{ problem.selected_model }} 
-                        {% if problem.model_type == "Classification" %}
-                        <span style="margin-left: 1rem;"><strong>🎯 Type:</strong> Classification</span>
-                        {% elif problem.model_type == "Regression" %}
-                        <span style="margin-left: 1rem;"><strong>🎯 Type:</strong> Regression</span>
-                        {% endif %}
-                    </p>
+                
+                <div class="tab-contents">
+                    <!-- Problem Statement & Approach Tab -->
+                    <div class="tab-content active" id="problem-tab">
+                        <div class="learning-content">
+                            {% if problem.problem_statement_detail %}
+                                {{ problem.problem_statement_detail|markdown_to_html }}
+                            {% endif %}
+                            
+                            {% if problem.approach_explanation %}
+                                <hr style="margin: 2rem 0; border: none; border-top: 2px solid #eee;">
+                                {{ problem.approach_explanation|markdown_to_html }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Preprocessing Tab -->
+                    <div class="tab-content" id="preprocessing-tab">
+                        <div class="learning-content">
+                            {% if problem.preprocessing_steps %}
+                                {{ problem.preprocessing_steps|markdown_to_html }}
+                            {% else %}
+                                <p>No preprocessing information available.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Architecture Tab -->
+                    <div class="tab-content" id="architecture-tab">
+                        <div class="learning-content">
+                            {% if problem.model_architecture %}
+                                {{ problem.model_architecture|markdown_to_html }}
+                            {% else %}
+                                <p>No model architecture details available.</p>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
