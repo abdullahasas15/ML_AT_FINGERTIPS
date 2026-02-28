@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: ml-at-fingertips
+    runtime: python
+    buildCommand: ./build.sh
+    startCommand: cd ml_at_fingertips && gunicorn ml_at_fingertips.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    envVars:
+      # Auto-generated strong secret key (Render creates this for you)
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+
+      # Disable debug mode in production
+      - key: DJANGO_DEBUG
+        value: "False"
+
+      # The .onrender.com domain (dot-prefix allows any subdomain)
+      - key: DJANGO_ALLOWED_HOSTS
+        value: ".onrender.com"
+
+      # Neon PostgreSQL connection URL — set this manually in Render dashboard
+      - key: DATABASE_URL
+        sync: false
+
+      # Perplexity AI API key — set this manually in Render dashboard
+      - key: PERPLEXITY_API_KEY
+        sync: false

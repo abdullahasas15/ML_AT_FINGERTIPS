@@ -633,7 +633,7 @@ def get_prediction_explanation(prediction, features, problem_title, model_type):
     Get AI-powered explanation for WHY this prediction was made
     """
     try:
-        api_key = "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"
+        api_key = settings.PERPLEXITY_API_KEY
         
         if model_type.lower() == 'regression':
             # Uber ETA prediction
@@ -772,7 +772,7 @@ def get_feature_impact_explanation(feature_importance, prediction, features, pro
     Get AI-powered explanation for HOW each feature impacted the prediction
     """
     try:
-        api_key = "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"
+        api_key = settings.PERPLEXITY_API_KEY
         
         # Get top 3 features
         if isinstance(feature_importance, list):
@@ -1025,7 +1025,7 @@ def get_perplexity_recommendations(prediction, features, problem_title, model_ty
             return "No specific recommendations available for this prediction."
     
     try:
-        api_key = "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"
+        api_key = settings.PERPLEXITY_API_KEY
         
         if model_type.lower() == 'regression':
             eta_minutes = int(prediction)
