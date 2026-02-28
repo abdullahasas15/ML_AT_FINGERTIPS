@@ -49,6 +49,14 @@ DEBUG = get_bool_env('DJANGO_DEBUG', True)
 
 ALLOWED_HOSTS = [host.strip() for host in os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',') if host.strip()]
 
+# Required for Django to accept HTTPS POST requests (CSRF) from these domains
+# Automatically built from ALLOWED_HOSTS — adds https:// prefix to each host
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{host}" for host in ALLOWED_HOSTS if not host.startswith('.')
+] + [
+    f"https://{host.lstrip('.')}" for host in ALLOWED_HOSTS if host.startswith('.')
+]
+
 
 # Application definition
 
